@@ -22,6 +22,13 @@ body {
     max-height: 1080px;
     display: inline-block;
 }
+.PrimaryImage2
+{
+    max-width: 100%;
+    max-height: 1080px;
+    display: inline-block;
+    opacity: 0.5;
+}
 .stack {
     display: grid;
 }
@@ -52,6 +59,47 @@ body {
     align-self: flex-start;              /* Forces each child to center align individually */
   }
 
+.CenterStackItem
+{
+    align-self: center;  
+}
+
+
+.CheckBox
+{
+    width: 20px;
+    height: 20px;
+    margin: 10px;
+}
+
+.Slider
+{
+    color: #000;
+}
+
+.VerticalSlider
+{
+    
+    writing-mode: vertical-lr;
+    direction: rtl;
+    margin-left: 20px;
+    margin-right: 20px;
+}
+.FlexContainer
+{
+    display: flex;
+    width: 100%;
+    align-items: center;
+}
+.LastLeftItem
+{
+    margin-right: auto;
+}
+.FillFlex
+{
+    flex:1
+}
+
 .ArrowImage
 {
     max-width: 100%;   /* Maximum width is 100% of the container */
@@ -64,7 +112,6 @@ body {
 .HorizontalStackPanel
 {
     flex: 0 0 auto;  /* Don't grow, don't shrink, auto-basis */
-    align-self: center;
     display: flex;          /* Enables Flexbox */
     flex-direction: row;    /* Children laid out in a row (left to right) */
     align-items: center;    /* Aligns children vertically in the center */
@@ -77,7 +124,50 @@ body {
     align-self: center;              /* Forces each child to center align individually */
   }
 
+  .AlignSelfCenter
+  {
+    align-self: center;
+  }
 
+
+.PercentBox
+{
+    min-width: 60px;
+    max-width: 180px;
+    height: 40px;
+    font-size: 20px;
+    margin: 0 20px;
+}
+.XYTitle
+{
+    margin: 0 20px
+}
+.Footer
+{
+    height: 40px;
+}
+
+.HomebrewButton
+{
+    background-color: #1e56a0;
+    border-radius: 20px;
+    cursor: pointer;
+    padding: 20px;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+.HomebrewButton:hover
+{
+    background-color: #2778e2;
+}
+.HomebrewButton:active
+{
+    background-color: #174179;
+}
 .StepText
 {
     display: inline;

@@ -28,6 +28,17 @@ export const PointSelect: FC<IPointSelectProperties> = ({src,displayX,displayY,p
     const [points,setPoints] = useState<Array<Point>>([])
     const [lockedPointCount,setLockedPointCount] = useState<number>(0)
 
+
+    useEffect(()=>{
+        ClearSelection()
+    },[src])
+
+    function ClearSelection()
+    {
+        setLockedPointCount(0)
+        setPoints([])
+    }
+
     function unlockedPoints():number{// gives number of crosshairs currently not locked in
         return points.length-lockedPointCount
     }
@@ -66,24 +77,23 @@ export const PointSelect: FC<IPointSelectProperties> = ({src,displayX,displayY,p
   return (
     <div>
         <div className='stack'>
-            <div>hello workd</div>
             <img className='PrimaryImage' src={src} onMouseLeave={handleMouseLeave} onMouseMove={handleMouseMove} onClick={handleCLick}
             ></img>
             {points.map((point,index)=>
             <React.Fragment key={index}>
-                    <div className="TargetLine" style={{/*vertical line*/
+                    <div className="TargetLine" style={{/*vertical line: defines X positioning*/
                         top: 0,
                         left: point.x,
                         width: '1px',
                         height: '100%',
-                        visibility: displayY ? "visible":"hidden",
+                        visibility: displayX ? "visible":"hidden",
                     }} />
-                    <div className="TargetLine" style={{/*horizontal line*/
+                    <div className="TargetLine" style={{/*horizontal line: defines Y positioning*/
                         left: 0,
                         top: point.y,
                         width: '100%',
                         height: '1px',
-                        visibility: displayX ? "visible":"hidden",
+                        visibility: displayY ? "visible":"hidden",
                     }} />
                 </React.Fragment>
             )}
