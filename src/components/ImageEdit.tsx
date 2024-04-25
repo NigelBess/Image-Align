@@ -22,27 +22,31 @@ const ImageEdit: React.FC = () => {
         return tutorialStep<5
     }
 
+    function ImageHover(){
+
+    }
+
 
 
     return (       
         <div className='OuterContainer Shadow'>
         <Overlay targetId='chooseImageButton' direction={OverlayDirection.Below}> 
             <div className='HorizontalStackPanel PulseGradient' style={{ visibility: showTutorial() && tutorialStep==1 ? "visible" : "hidden" }} >
-                <img className='ArrowImage' src={step1Arrow} style={{height:"100px"}}/>
+                <img className='ArrowImage' src={step1Arrow} style={{height:"150px"}}/>
                 <span className='StepText'  >Choose a file</span>
             </div>           
         </Overlay>
         <Overlay targetId='uploadedImage' direction={OverlayDirection.Right}> 
             <div className='StackPanel PulseGradient' style={{ visibility: showTutorial() && tutorialStep==2 ? "visible" : "hidden" }} >
             <span className='StepText' >Select the point you want to align</span>
-            <img className='ArrowImage' src={step2Arrow} style={{height:"100px"}}/>
+            <img className='ArrowImage' src={step2Arrow} style={{height:"70px", width:"auto", float:"left"}} />
             </div>
            
         </Overlay>
             <div className='ImageColumn'>
                 <div className="StackPanel">
                     <input id="chooseImageButton" className='ImageUploadButton' type="file" accept="image/*" onChange={changeImage} />
-                    <img id="uploadedImage" className="PrimaryImage" src={imagePath}  alt="" style={{ visibility: imagePath ? "visible" : "hidden" }}/>
+                    <img id="uploadedImage" onMouseOver={ImageHover} className="PrimaryImage" src={imagePath}  alt="" style={{ visibility: imagePath ? "visible" : "hidden" }}/>
                 </div>
             </div>
             <div className='ToolColumn'></div>

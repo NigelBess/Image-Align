@@ -27,13 +27,19 @@ body {
 {
     display: flex;
     flex-direction: column;
+    align-items: flex-start;
     justify-content: flex-start; /* Aligns children to the start of the flex container */
     gap:10px
 }
 
 .ArrowImage
 {
+    max-width: 100%;   /* Maximum width is 100% of the container */
+    max-height: 100%;  /* Maximum height is 100% of the container */
+    width: auto;       /* Width will be the natural size or less */
+    height: auto;      /* Height will be the natural size or less */
     object-fit: contain;
+    display: inline-block;
 }
 .HorizontalStackPanel
 {
