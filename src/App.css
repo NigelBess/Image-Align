@@ -22,7 +22,22 @@ body {
     max-height: 1080px;
     display: inline-block;
 }
+.stack {
+    display: grid;
+}
+.stack > * 
+{
+    grid-area: 1/ 1 / 2 / 2;
+}
 
+.TargetLine
+{
+    position: relative;
+    background-color: #F006;
+    pointer-events: none;
+    box-shadow: 0 0 10px #FFF;
+    border: 1px solid #ffffff85;
+}
 
 .StackPanel
 {

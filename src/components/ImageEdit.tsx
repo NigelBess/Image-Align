@@ -28,7 +28,7 @@ const ImageEdit: React.FC = () => {
 
     function handlePointsChanged(points:Point[])
     {
-
+        setTutorialStep(3)
     }
 
 

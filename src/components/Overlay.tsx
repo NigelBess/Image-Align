@@ -35,6 +35,7 @@ export const Overlay: React.FC<IOverlayProperties> = ({ targetRef, children,dire
     });
     if (targetRef.current)
       observer.observe(targetRef.current)
+    return () =>{observer.disconnect()}
   },[]);//empty array to make sure this only runs once
 
   function UpdatePosition()
