@@ -8,7 +8,7 @@ const BuyMeACoffee: React.FC = () =>{
     return(
         <div>
             <a href='https://www.buymeacoffee.com/nigelbess'  target='_blank'>
-                <img alt = "Buy Me A Coffee" src={bmcImage} className="CoffeeButtonImage">
+                <img alt = "Buy Me A Coffee" src={bmcImage} className="CoffeeButtonImage Shadow">
                 </img>
 
             </a>

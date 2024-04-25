@@ -18,19 +18,24 @@ body {
 }
 .PrimaryImage
 {
-    max-width: 80%;
+    max-width: 100%;
     max-height: 1080px;
-    display: inline;
+    display: inline-block;
 }
+
 
 .StackPanel
 {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    justify-content: flex-start; /* Aligns children to the start of the flex container */
-    gap:10px
+    gap:10px;
 }
+.StackPanel > * {
+    /* This rule ensures that no specific item affects the general alignment */
+    margin: 0;                       /* Removes margin that might affect alignment */
+    align-self: flex-start;              /* Forces each child to center align individually */
+  }
 
 .ArrowImage
 {
@@ -79,12 +84,9 @@ body {
     display: flex;
     min-height: 600px;
 }
-.ImageColumn
+#ImageColumn
 {
-    min-width: 40%;
-    display: flex;
-    justify-content:left;
-
+    width: 70%;
 }
 .ToolColumn
 {
@@ -96,11 +98,11 @@ body {
     box-shadow: 0 0 10px #000;
     border: 1px solid #000a;
 }
-
-.Debug
+.Wrapper
 {
-    background-color: pink;
+    display: inline-block;
 }
+
 .ImageUploadButton
 {
     cursor: pointer;

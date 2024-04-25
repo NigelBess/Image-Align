@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef, ReactNode} from 'react';
+import React, { useState, useEffect, useRef, ReactNode, RefObject} from 'react';
 
 interface IOverlayProperties {
-  targetId: string;  // Define the props using an interface
+  targetRef: RefObject<HTMLElement>; 
   children: ReactNode;
   direction: OverlayDirection;
 }
@@ -25,39 +25,31 @@ function GetPosition(direction: OverlayDirection, targetRect: DOMRect): [number,
 }
 
 
-export const Overlay: React.FC<IOverlayProperties> = ({ targetId, children,direction }) => {  // Destructure the props correctly
-  const overlayRef = useRef<HTMLDivElement>(null);
+export const Overlay: React.FC<IOverlayProperties> = ({ targetRef, children,direction }) => {  // Destructure the props correctly
+  const self = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState({ top: 0, left: 0 });
-  let target:HTMLElement|null= null
 
-  useEffect(() => {
-    target ??= document.getElementById(targetId);
+  useEffect(()=>{
+    const observer = new ResizeObserver(targetRef => {
+      UpdatePosition()
+    });
+    if (targetRef.current)
+      observer.observe(targetRef.current)
+  },[]);//empty array to make sure this only runs once
 
-    const setPositionFromTarget = () => {
-      if (target && overlayRef.current) {
-        const [top,left] = GetPosition(direction,target.getBoundingClientRect())
-        
-        setPosition({
+  function UpdatePosition()
+  {
+      if (!targetRef.current || !self.current) return;
+      const [top,left] = GetPosition(direction,targetRef.current.getBoundingClientRect())
+      if (position.top == top && position.left==left) return
+      setPosition({
           top: top,  
           left: left
         });
-      }
-    };
-
-    setPositionFromTarget();
-
-    // Update position on window resize or scroll
-    window.addEventListener('resize', setPositionFromTarget);
-    window.addEventListener('scroll', setPositionFromTarget);
-
-    return () => {
-      window.removeEventListener('resize', setPositionFromTarget);
-      window.removeEventListener('scroll', setPositionFromTarget);
-    };
-  }, );
+  }
 
   return (
-    <div ref={overlayRef} style={{ 
+    <div ref={self} style={{ 
       position: 'absolute',
        top: position.top, 
        left: position.left,
