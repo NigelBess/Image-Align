@@ -1,4 +1,4 @@
-import React, { useEffect, MouseEventHandler, FC, useState} from 'react';
+import React, { useEffect, MouseEventHandler, FC, useState, UIEventHandler} from 'react';
 
 export class Point{
     x:number = 0;
@@ -74,9 +74,10 @@ export const PointSelect: FC<IPointSelectProperties> = ({src,displayX,displayY,p
   }
 
 
+
   return (
     <div>
-        <div className='stack'>
+        <span className='stack'>
             <img className='PrimaryImage' src={src} onMouseLeave={handleMouseLeave} onMouseMove={handleMouseMove} onClick={handleCLick}
             ></img>
             {points.map((point,index)=>
@@ -97,7 +98,7 @@ export const PointSelect: FC<IPointSelectProperties> = ({src,displayX,displayY,p
                     }} />
                 </React.Fragment>
             )}
-        </div>
+        </span>
         
     </div>
     

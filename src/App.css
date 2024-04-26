@@ -18,12 +18,15 @@ body {
 }
 .PrimaryImage
 {
+    min-width: 60%;
     max-width: 100%;
     max-height: 1080px;
     display: inline-block;
+    overflow: auto;
 }
 .PrimaryImage2
 {
+    min-width: 60%;
     max-width: 100%;
     max-height: 1080px;
     display: inline-block;
@@ -31,10 +34,17 @@ body {
 }
 .stack {
     display: grid;
+    
 }
 .stack > * 
 {
     grid-area: 1/ 1 / 2 / 2;
+}
+
+.sticky
+{
+    top:0px;
+    position: fixed;
 }
 
 .TargetLine
@@ -74,7 +84,6 @@ body {
 
 .Slider
 {
-    color: #000;
 }
 
 .VerticalSlider
@@ -129,7 +138,10 @@ body {
     align-self: center;
   }
 
-
+.FillHorizontal
+{
+    width: 100%;
+}
 .PercentBox
 {
     min-width: 60px;

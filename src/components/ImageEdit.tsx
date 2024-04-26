@@ -1,30 +1,34 @@
-import React, { useRef, useState} from 'react';
+import React, { useRef, useState, useEffect} from 'react';
 import {OverlayDirection, Overlay} from './Overlay';
 import step1Arrow from "../img/step1Arrow.png"
-import step2Arrow from '../img/step2arrow.png';
+import step2Arrow from '../img/step2Arrow.png';
+import step3Arrow from '../img/step3Arrow.png';
 import { PointSelect, Point} from './PointSelect';
+import { Toolbox, AlignmentSettings } from './Toolbox';
 
-interface AdjustmentEnable
-{
-    EnableX:boolean;
-    EnableY:boolean;
-}
 
-interface Adjustment
-{
-    X:number;
-    Y:number;
-}
 
-const ImageEdit: React.FC = () => {
+export const ImageEdit: React.FC = () => {
     const [imagePath, setImagePath] = useState<string >('');
     const [tutorialStep, setTutorialStep] = useState<number>(1);
     const [showTutorial, setShowTutorial] = useState<boolean>(true);
-    const [adjustmentEnable,setAdjustmentEnable] = useState<AdjustmentEnable>({EnableX:true, EnableY:true})
-    const [adjustment,setAdjustment] = useState<Adjustment>({X:0,Y:0})
+    const [isToolboxSticky, setToolboxSticky] = useState<boolean>(false);
+    const [alignmentSettings,setAlignmentSettings] = useState<AlignmentSettings>({AlignX:true,AlignY:true,X:0,Y:0});
+
 
     const chooseImageButton = useRef(null)
     const firstImage = useRef(null)
+    const toolBox = useRef<HTMLElement>(null)
+    const toolboxTopOffset = useRef(0); // To store the initial top offset of the toolbox
+
+
+    useEffect(() => {
+    window.addEventListener('scroll', handleScroll);
+
+    return () => {
+        window.removeEventListener('scroll', handleScroll);
+    };
+    }, []);
 
 
     const changeImage= (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -37,6 +41,15 @@ const ImageEdit: React.FC = () => {
         setImagePath(url)        
     }
 
+    const handleScroll = () => {
+        const currentScrollPos = window.scrollY;
+        if (!toolBox.current) return
+        if (!toolboxTopOffset.current)  toolboxTopOffset.current = toolBox.current.offsetTop;// Set initial top offset if it hasn't been set               
+
+        setToolboxSticky(currentScrollPos >= toolboxTopOffset.current);
+
+      };
+    
     function MoveTutorialStep(step:number)
     {
         if (tutorialStep<step) setTutorialStep(step);
@@ -57,36 +70,11 @@ const ImageEdit: React.FC = () => {
         return !showTutorial || tutorialStep>2
     }
 
-    function handleXEnableChanged() {
-        setAdjustmentEnable(oldState=>({...oldState,EnableX:!oldState.EnableX}));
-        Recalculate();
-    }
 
-    function handleYEnableChanged() {
-        setAdjustmentEnable(oldState=>({...oldState,EnableY:!oldState.EnableY}));
-        Recalculate();
-    }
 
-    function handleCenterClicked()
+    function handleAlignmentSettingsChanged(newSettings:AlignmentSettings)
     {
-        setAdjustment({X:50,Y:50});
-        Recalculate();
-    }
-    function handleYChanged(event: React.ChangeEvent<HTMLInputElement>)
-    {
-        const newValue = parseFloat(event.target.value)
-        setAdjustment({...adjustment,Y:newValue})
-        Recalculate();
-    }
-    function handleXChanged(event: React.ChangeEvent<HTMLInputElement>)
-    {
-        const newValue = parseFloat(event.target.value)
-        setAdjustment({...adjustment,X:newValue})
-        Recalculate();
-    }
-
-    function Recalculate()
-    {
+        setAlignmentSettings(newSettings)
         MoveTutorialStep(4)
         console.log("Recalculate Triggered")
     }
@@ -96,53 +84,39 @@ const ImageEdit: React.FC = () => {
         <Overlay targetRef={chooseImageButton} direction={OverlayDirection.Below}> 
             <div className='HorizontalStackPanel PulseGradient' style={{ visibility: showTutorialStep(1)? "visible" : "hidden" }} >
                 <img className='ArrowImage' src={step1Arrow} style={{height:"150px"}}/>
-                <span className='StepText'  >Choose a file</span>
+                <span className='StepText'  >Choose an image you want to align</span>
             </div>           
         </Overlay>
         <Overlay targetRef={firstImage} direction={OverlayDirection.Right}> 
             <div className='StackPanel PulseGradient' style={{ visibility: showTutorialStep(2) ? "visible" : "hidden" }} >
-            <span className='StepText' >Select the point you want to align</span>
-            <img className='ArrowImage' src={step2Arrow} style={{height:"70px", width:"auto", float:"left"}} />
-            </div>
-           
+                <span className='StepText' >Select the point you want to align</span>
+                <img className='ArrowImage' src={step2Arrow} style={{height:"70px", width:"auto", float:"left"}} />
+            </div>           
         </Overlay>
+        <Overlay targetRef={toolBox} direction={OverlayDirection.Below}> 
+                        <div className='HorizontalStackPanel PulseGradient' style={{ visibility: showTutorialStep(3)? "visible" : "hidden" }} >
+                            <img className='ArrowImage' src={step3Arrow} style={{height:"150px"}}/>
+                            <span className='StepText'>Adjust the alignment settings here</span>
+                        </div>        
+        </Overlay>
+        
             <div id='ImageColumn'>
-                <div className="StackPanel">
-                <input ref={chooseImageButton} className='ImageUploadButton' type="file" accept="image/*" onChange={changeImage} />
-                <span ref={firstImage} id="uploadedImage" className="Wrapper" style={{ visibility: imagePath ? "visible" : "hidden" }} >
-                    <PointSelect  src={imagePath} displayX={adjustmentEnable.EnableX} displayY={adjustmentEnable.EnableY} pointsChanged={handlePointsChanged}/>
-                </span>
-                <div className='Stack'>
-                    <span className='Wrapper'>
-                        <img src={imagePath} className='PrimaryImage2'></img>
+                <div className="StackPanel ">
+                    <input ref={chooseImageButton} className='ImageUploadButton' type="file" accept="image/*" onChange={changeImage} />
+                    <span ref={firstImage} id="uploadedImage" className="FillHorizontal" style={{ visibility: imagePath ? "visible" : "hidden" }} >
+                        <PointSelect  src={imagePath} displayX={alignmentSettings.AlignX} displayY={alignmentSettings.AlignY} pointsChanged={handlePointsChanged}/>
                     </span>
-                </div>
-                
+                    <div className='Stack FillHorizontal'>
+                            <img src={imagePath} className='PrimaryImage2'></img>
+                    </div>
+                    
                     
                 </div>
             </div>
             <div className='ToolColumn'  style={{ visibility: showToolBar() ? "visible" : "hidden" }}>
-                <div className='StackPanel' style={{margin:"20px"}}>
-                    <div className='CenterStackItem'>New Position</div>
-                    <div className='StackPanel AlignSelfCenter'>
-                        <div className='FlexContainer'>
-                            <input type='checkbox' onChange={handleXEnableChanged} className='CheckBox' checked={adjustmentEnable.EnableX}/>
-                            <span className='XYTitle'> X:</span>
-                            <input type='range' value={adjustment.X} onChange={handleXChanged} className='Slider FillFlex' disabled={!adjustmentEnable.EnableX}/>
-                            <input className='PercentBox' onChange={handleXChanged} value={adjustment.X} disabled={!adjustmentEnable.EnableX}/>
-                            <span>%</span>
-                        </div>
-                        <div className='FlexContainer'>
-                            <input type='checkbox' onChange={handleYEnableChanged} className='CheckBox' checked={adjustmentEnable.EnableY}/>
-                            <span className='XYTitle'> Y:</span>
-                            <input type='range' value={adjustment.Y} onChange={handleYChanged} className='Slider VerticalSlider FillFlex' disabled={!adjustmentEnable.EnableY}/>
-                            <input type='number' value={adjustment.Y} onChange={handleYChanged} className='PercentBox' disabled={!adjustmentEnable.EnableY}/>
-                            <span>%</span>
-                        </div>
-                    </div>
-                    
-                    <div className='Shadow HomebrewButton AlignSelfCenter' onClick={handleCenterClicked}>Center</div>
-                </div>
+                <span className={isToolboxSticky ? 'sticky' : ''} ref={toolBox}>
+                    <Toolbox  alignmentSettingsChanged={handleAlignmentSettingsChanged}/>                    
+                </span>
                 
             </div>
         </div>
@@ -152,5 +126,3 @@ const ImageEdit: React.FC = () => {
     )
 
 };
-
-export default ImageEdit;

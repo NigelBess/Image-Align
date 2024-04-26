@@ -1,13 +1,13 @@
 import React from 'react';
 import './App.css';
-import ImageEdit from './components/ImageEdit';
+import {ImageEdit} from './components/ImageEdit';
 import BuyMeACoffee from './components/BuyMeACoffee';
 
 
 
 
 
-const App:React.FC = () => {
+export const App:React.FC = () => {
   return (
     <div className="App">
       <span className="Heading"> Image Align</span>

@@ -35,7 +35,15 @@ export const Overlay: React.FC<IOverlayProperties> = ({ targetRef, children,dire
     });
     if (targetRef.current)
       observer.observe(targetRef.current)
-    return () =>{observer.disconnect()}
+
+
+    window.addEventListener('scroll', UpdatePosition);
+
+
+    return () =>{
+      observer.disconnect();
+      window.removeEventListener('scroll', UpdatePosition);
+    }
   },[]);//empty array to make sure this only runs once
 
   function UpdatePosition()
@@ -51,7 +59,7 @@ export const Overlay: React.FC<IOverlayProperties> = ({ targetRef, children,dire
 
   return (
     <div ref={self} style={{ 
-      position: 'absolute',
+      position: "absolute",
        top: position.top, 
        left: position.left,
         zIndex: 1000,
