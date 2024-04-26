@@ -1,48 +1,52 @@
-import React, { useState} from 'react';
+import React, { useEffect, useState} from 'react';
 
 
 export interface AlignmentSettings
 {
-    AlignX:boolean;
-    AlignY:boolean;
-    X:number;
-    Y:number;
+    AlignX:boolean
+    AlignY:boolean
+    X:number
+    Y:number
 }
 
 interface IToolboxProperties
 {
+    alignmentSettings:AlignmentSettings
     alignmentSettingsChanged:(settings:AlignmentSettings)=>void
 }
 
 
-export const Toolbox: React.FC<IToolboxProperties> = ({alignmentSettingsChanged}) => {
-    const [alignmentSettings,setAlignmentSettings] = useState<AlignmentSettings>({AlignX:true,AlignY:true,X:0,Y:0})
+export const Toolbox: React.FC<IToolboxProperties> = ({alignmentSettings,alignmentSettingsChanged}) => {
+
+    const [currentSettings,setCurrentSettings] = useState<AlignmentSettings>(alignmentSettings)
+    useEffect(()=>{
+        setCurrentSettings(alignmentSettings)
+    },[alignmentSettings])
 
     function handleXEnableChanged() {
-        setAlignmentSettings(oldState=>({...oldState,AlignX:!oldState.AlignX}));
-        AlignmentSettingsChanged();
+        setCurrentSettings(old=>({...old,AlignX:!old.AlignX}))
     }
 
     function handleYEnableChanged() {
-        setAlignmentSettings(oldState=>({...oldState,AlignY:!oldState.AlignY}));
+        setCurrentSettings(oldState=>({...oldState,AlignY:!oldState.AlignY}));
         AlignmentSettingsChanged();
     }
 
     function handleCenterClicked()
     {
-        setAlignmentSettings(oldState=>({...oldState,X:50,Y:50}));
+        setCurrentSettings(oldState=>({...oldState,X:50,Y:50}));
         AlignmentSettingsChanged();
     }
     function handleYChanged(event: React.ChangeEvent<HTMLInputElement>)
     {
         const newValue = parseFloat(event.target.value)
-        setAlignmentSettings(oldState=>({...oldState,Y:newValue}));
+        setCurrentSettings(oldState=>({...oldState,Y:newValue}));
         AlignmentSettingsChanged();
     }
     function handleXChanged(event: React.ChangeEvent<HTMLInputElement>)
     {
         const newValue = parseFloat(event.target.value)
-        setAlignmentSettings(oldState=>({...oldState,X:newValue}));
+        setCurrentSettings(oldState=>({...oldState,X:newValue}));
         AlignmentSettingsChanged();
     }
 
@@ -51,24 +55,23 @@ export const Toolbox: React.FC<IToolboxProperties> = ({alignmentSettingsChanged}
         alignmentSettingsChanged(alignmentSettings)
     }
 
-
     return (       
 
                 <div className='StackPanel' style={{margin:"20px"}}>
                     <div className='CenterStackItem'>New Position</div>
                     <div className='StackPanel AlignSelfCenter'>
                         <div className='FlexContainer'>
-                            <input type='checkbox' onChange={handleXEnableChanged} className='CheckBox' checked={alignmentSettings.AlignX}/>
+                            <input type='checkbox' onChange={handleXEnableChanged} className='CheckBox' checked={currentSettings.AlignX}/>
                             <span className='XYTitle'> X:</span>
-                            <input type='range' value={alignmentSettings.X} onChange={handleXChanged} className='Slider FillFlex' disabled={!alignmentSettings.AlignX}/>
-                            <input className='PercentBox' onChange={handleXChanged} value={alignmentSettings.X} disabled={!alignmentSettings.AlignX}/>
+                            <input type='range' value={currentSettings.X} onChange={handleXChanged} className='Slider FillFlex' disabled={!currentSettings.AlignX}/>
+                            <input className='PercentBox' onChange={handleXChanged} value={currentSettings.X} disabled={!currentSettings.AlignX}/>
                             <span>%</span>
                         </div>
                         <div className='FlexContainer'>
-                            <input type='checkbox' onChange={handleYEnableChanged} className='CheckBox' checked={alignmentSettings.AlignY}/>
+                            <input type='checkbox' onChange={handleYEnableChanged} className='CheckBox' checked={currentSettings.AlignY}/>
                             <span className='XYTitle'> Y:</span>
-                            <input type='range' value={alignmentSettings.Y} onChange={handleYChanged} className='Slider VerticalSlider FillFlex' disabled={!alignmentSettings.AlignY}/>
-                            <input type='number' value={alignmentSettings.Y} onChange={handleYChanged} className='PercentBox' disabled={!alignmentSettings.AlignY}/>
+                            <input type='range' value={currentSettings.Y} onChange={handleYChanged} className='Slider VerticalSlider FillFlex' disabled={!currentSettings.AlignY}/>
+                            <input type='number' value={currentSettings.Y} onChange={handleYChanged} className='PercentBox' disabled={!currentSettings.AlignY}/>
                             <span>%</span>
                         </div>
                     </div>

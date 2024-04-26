@@ -1,9 +1,8 @@
-import React, { useEffect, MouseEventHandler, FC, useState, UIEventHandler} from 'react';
+import React, { useEffect, MouseEventHandler, FC, useState, useRef} from 'react';
+import {Point,Size} from '../DataObjects'
+import * as Helpers from '../Helpers'
 
-export class Point{
-    x:number = 0;
-    y:number = 0;
-}
+
 
 interface IPointSelectProperties {
     src:string
@@ -27,6 +26,9 @@ export const PointSelect: FC<IPointSelectProperties> = ({src,displayX,displayY,p
     const maxPoints:number = 1//set this to 2 in the future when we want to allow 2-point select
     const [points,setPoints] = useState<Array<Point>>([])
     const [lockedPointCount,setLockedPointCount] = useState<number>(0)
+
+    const img = useRef<HTMLImageElement>(null)
+
 
 
     useEffect(()=>{
@@ -61,9 +63,37 @@ export const PointSelect: FC<IPointSelectProperties> = ({src,displayX,displayY,p
   }
 
   const handleCLick:MouseEventHandler<HTMLElement> = (event) =>  {
-    pointsChanged(points.slice(0, lockedPointCount+1))    
-    setLockedPointCount(prev => prev+1)
-        
+    broadcastPoints(lockedPointCount+1)
+    setLockedPointCount(prev => prev+1)    
+  }
+
+  function broadcastPoints(pointCount:number)
+  {
+    if (!img.current) throw new Error("attempting to select points on a non-existing image. This is likely a bug");
+    const preparedPoints = points.slice(0, pointCount).map(p=>PreparePointForExport(p,img.current as HTMLImageElement))
+    console.log(preparedPoints[0].x)
+    pointsChanged(preparedPoints)
+  }
+
+  function PreparePointForExport(point:Point, image:HTMLImageElement):Point
+  //converts point in html/screen coordinates to image coordinates
+  { 
+        const htmlSize:Size = {width:image.width,height:image.height}
+        const imgSize:Size = {width:image.naturalWidth,height:image.naturalHeight}
+        point = convertPointToImagePixelLocations(point,htmlSize,imgSize)
+        point = Helpers.FlipVerticalAxis(point,imgSize)
+        return point
+  }
+  function convertPointToImagePixelLocations(point:Point,imageSizeHTML:Size, imageSizeActual:Size):Point
+  {
+    
+    const x = convert(point.x,imageSizeHTML.width,imageSizeActual.width)
+    const y = convert(point.y,imageSizeHTML.height,imageSizeActual.height)
+
+    function convert(pixelValue:number,oldRange:number,newRange:number):number{
+        return pixelValue*newRange/oldRange
+    }
+    return {x:x,y:y};
   }
 
   const handleMouseLeave: MouseEventHandler<HTMLElement> = (event) =>  {
@@ -78,7 +108,7 @@ export const PointSelect: FC<IPointSelectProperties> = ({src,displayX,displayY,p
   return (
     <div>
         <span className='stack'>
-            <img className='PrimaryImage' src={src} onMouseLeave={handleMouseLeave} onMouseMove={handleMouseMove} onClick={handleCLick}
+            <img className='PrimaryImage' src={src} ref={img} onMouseLeave={handleMouseLeave} onMouseMove={handleMouseMove} onClick={handleCLick}
             ></img>
             {points.map((point,index)=>
             <React.Fragment key={index}>

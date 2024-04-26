@@ -3,9 +3,10 @@ import {OverlayDirection, Overlay} from './Overlay';
 import step1Arrow from "../img/step1Arrow.png"
 import step2Arrow from '../img/step2Arrow.png';
 import step3Arrow from '../img/step3Arrow.png';
-import { PointSelect, Point} from './PointSelect';
+import { PointSelect} from './PointSelect';
 import { Toolbox, AlignmentSettings } from './Toolbox';
-
+import * as Helpers from '../Helpers'
+import {Point,Size} from '../DataObjects'
 
 
 export const ImageEdit: React.FC = () => {
@@ -18,6 +19,7 @@ export const ImageEdit: React.FC = () => {
 
     const chooseImageButton = useRef(null)
     const firstImage = useRef(null)
+    const loadedImage = useRef<ImageBitmap|null>(null)
     const toolBox = useRef<HTMLElement>(null)
     const toolboxTopOffset = useRef(0); // To store the initial top offset of the toolbox
 
@@ -36,9 +38,23 @@ export const ImageEdit: React.FC = () => {
         if (!imageFile) return
 
         const url = URL.createObjectURL(imageFile);
-        
+        LoadImage(url,OnLoadedImage)
         MoveTutorialStep(2)
         setImagePath(url)        
+    }
+
+    async function LoadImage(url:string,callback:(image:ImageBitmap)=>void)
+    {
+        const response = await fetch(url);    
+        if (!response.ok) return null
+        const imageBlob = await response.blob()
+        const image = await createImageBitmap(imageBlob)
+        callback(image)
+    }
+
+    function OnLoadedImage(image:ImageBitmap)
+    {
+        loadedImage.current = image;
     }
 
     const handleScroll = () => {
@@ -62,7 +78,18 @@ export const ImageEdit: React.FC = () => {
 
     function handlePointsChanged(points:Point[])
     {
+        if(!points) return;
+        if(loadedImage.current) InitializeAlignmentSettings(points[0],loadedImage.current);
         MoveTutorialStep(3)
+    }
+
+    function InitializeAlignmentSettings(point:Point, image:ImageBitmap)
+    {
+        const size:Size = {width:image.width, height:image.height}
+        point = Helpers.PixelToPercent(point,size)
+        const x = Helpers.Round(point.x)
+        const y =  Helpers.Round(point.y)
+        setAlignmentSettings(old=>({...old,X:x,Y:y}))
     }
 
     function showToolBar():boolean
@@ -106,16 +133,13 @@ export const ImageEdit: React.FC = () => {
                     <span ref={firstImage} id="uploadedImage" className="FillHorizontal" style={{ visibility: imagePath ? "visible" : "hidden" }} >
                         <PointSelect  src={imagePath} displayX={alignmentSettings.AlignX} displayY={alignmentSettings.AlignY} pointsChanged={handlePointsChanged}/>
                     </span>
-                    <div className='Stack FillHorizontal'>
-                            <img src={imagePath} className='PrimaryImage2'></img>
-                    </div>
                     
                     
                 </div>
             </div>
             <div className='ToolColumn'  style={{ visibility: showToolBar() ? "visible" : "hidden" }}>
                 <span className={isToolboxSticky ? 'sticky' : ''} ref={toolBox}>
-                    <Toolbox  alignmentSettingsChanged={handleAlignmentSettingsChanged}/>                    
+                    <Toolbox alignmentSettings={alignmentSettings}  alignmentSettingsChanged={handleAlignmentSettingsChanged}/>                    
                 </span>
                 
             </div>
