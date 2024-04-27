@@ -6,9 +6,8 @@ import step3Arrow from '../img/step3Arrow.png';
 import { PointSelect} from './PointSelect';
 import { Toolbox, AlignmentSettings } from './Toolbox';
 import {Round, PixelToPercent,PercentToRatio} from '../Helpers'
-import  {Point,Size,Crop,DefaultCrop} from '../DataObjects'
-import {Dim,ConvertToDims,CalculateNewDim} from '../Dimension'
-import { off } from 'process';
+import  {Point,Size,Crop,DefaultCrop,DefaultSize} from '../DataObjects'
+import {ConvertToDims,CalculateNewDim} from '../Dimension'
 
 
 export const ImageEdit: React.FC = () => {
@@ -16,7 +15,7 @@ export const ImageEdit: React.FC = () => {
     const [tutorialStep, setTutorialStep] = useState<number>(1);
     const [showTutorial, setShowTutorial] = useState<boolean>(true);
     const [isToolboxSticky, setToolboxSticky] = useState<boolean>(false);
-    const [alignmentSettings,setAlignmentSettings] = useState<AlignmentSettings>({AlignX:true,AlignY:true,xPercent:0,yPercent:0});
+    const [alignmentSettings,setAlignmentSettings] = useState<AlignmentSettings>({alignX:true,alignY:true,xPercent:0,yPercent:0,useSize:false,size:DefaultSize()});
     const [crop,setCrop] = useState<Crop>(DefaultCrop())
 
 
@@ -77,7 +76,10 @@ export const ImageEdit: React.FC = () => {
 
 
     function showTutorialStep(step:number):boolean {
-        return tutorialStep==step && showTutorial
+        
+        const show = tutorialStep==step && showTutorial
+        console.log(`should we start step ${step}? ${show?"yes":"no"} tutorialStep=${tutorialStep}, showTutorial=${showTutorial} `)
+        return show
     }
 
     function handlePointsChanged(points:Point[])
@@ -108,8 +110,12 @@ export const ImageEdit: React.FC = () => {
     function handleAlignmentSettingsChanged(newSettings:AlignmentSettings)
     {
         setAlignmentSettings(newSettings)
-        MoveTutorialStep(4)
         RecalculateCrop(newSettings)
+    }
+
+    function handleClickedToolColumn()
+    {
+        if(tutorialStep==3) MoveTutorialStep(4)
     }
 
     //updates the crop info from the user selected alignment settings
@@ -121,11 +127,10 @@ export const ImageEdit: React.FC = () => {
         const pointPixel = focalPoint.current
         const img = loadedImage.current;
         const imgSizePixels:Size = {width:img.width,height:img.height}         
-        const pointPercent = PixelToPercent(pointPixel,imgSizePixels)
 
         let [xDim,yDim] = ConvertToDims(pointPixel,imgSizePixels)
-        xDim = CalculateNewDim(xDim,PercentToRatio(alignment.xPercent))
-        yDim = CalculateNewDim(yDim,PercentToRatio(alignment.yPercent))
+        if(alignment.alignX) xDim = CalculateNewDim(xDim,PercentToRatio(alignment.xPercent));
+        if(alignment.alignY) yDim = CalculateNewDim(yDim,PercentToRatio(alignment.yPercent));
         
         const offsetX = pointPixel.x - xDim.x
         const offsetY = pointPixel.y - yDim.x
@@ -161,13 +166,13 @@ export const ImageEdit: React.FC = () => {
                 <div className="StackPanel ">
                     <input ref={chooseImageButton} className='ImageUploadButton' type="file" accept="image/*" onChange={changeImage} />
                     <span ref={iamgeContainer} id="uploadedImage" className="FillHorizontal" style={{ visibility: imagePath ? "visible" : "hidden" }} >
-                        <PointSelect crop={crop} src={imagePath} displayX={alignmentSettings.AlignX} displayY={alignmentSettings.AlignY} pointsChanged={handlePointsChanged}/>
+                        <PointSelect crop={crop} src={imagePath} displayX={alignmentSettings.alignX} displayY={alignmentSettings.alignY} pointsChanged={handlePointsChanged}/>
                     </span>
                     
                     
                 </div>
             </div>
-            <div className='ToolColumn'  style={{ visibility: showToolBar() ? "visible" : "hidden" }}>
+            <div className='ToolColumn' onMouseDown={handleClickedToolColumn} style={{ visibility: showToolBar() ? "visible" : "hidden" }}>
                 <span className={isToolboxSticky ? 'sticky' : ''} ref={toolBox}>
                     <Toolbox alignmentSettings={alignmentSettings}  alignmentSettingsChanged={handleAlignmentSettingsChanged}/>                    
                 </span>

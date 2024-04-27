@@ -1,13 +1,18 @@
 import React, { useEffect, useState} from 'react';
 import { ClampPercent } from '../Helpers';
+import { Size } from '../DataObjects';
 
 
 export interface AlignmentSettings
 {
-    AlignX:boolean
-    AlignY:boolean
+    alignX:boolean
     xPercent:number
+
+    alignY:boolean
     yPercent:number
+
+    useSize:boolean
+    size:Size
 }
 
 interface IToolboxProperties
@@ -29,11 +34,11 @@ export const Toolbox: React.FC<IToolboxProperties> = ({alignmentSettings,alignme
     },[currentSettings])
 
     function handleXEnableChanged() {
-        setCurrentSettings(old=>Clean({...old,AlignX:!old.AlignX}))
+        setCurrentSettings(old=>Clean({...old,alignX:!old.alignX}))
     }
 
     function handleYEnableChanged() {
-        setCurrentSettings(oldState=>Clean({...oldState,AlignY:!oldState.AlignY}));
+        setCurrentSettings(oldState=>Clean({...oldState,alignY:!oldState.alignY}));
     }
 
     function handleCenterClicked()
@@ -76,17 +81,17 @@ export const Toolbox: React.FC<IToolboxProperties> = ({alignmentSettings,alignme
                     <div className='CenterStackItem'>New Position</div>
                     <div className='StackPanel AlignSelfCenter'>
                         <div className='FlexContainer'>
-                            <input type='checkbox' onChange={handleXEnableChanged} className='CheckBox' checked={currentSettings.AlignX}/>
+                            <input type='checkbox' onChange={handleXEnableChanged} className='CheckBox' checked={currentSettings.alignX}/>
                             <span className='XYTitle'> X:</span>
-                            <input type='range' value={currentSettings.xPercent} onChange={handleXChanged} className='Slider FillFlex' disabled={!currentSettings.AlignX}/>
-                            <input className='PercentBox' onInput={handleXChanged} value={currentSettings.xPercent} disabled={!currentSettings.AlignX}/>
+                            <input type='range' value={currentSettings.xPercent} onChange={handleXChanged} className='Slider FillFlex' disabled={!currentSettings.alignX}/>
+                            <input type='number' className='PercentBox' onChange={handleXChanged} value={currentSettings.xPercent} disabled={!currentSettings.alignX}/>
                             <span>%</span>
                         </div>
                         <div className='FlexContainer'>
-                            <input type='checkbox' onChange={handleYEnableChanged} className='CheckBox' checked={currentSettings.AlignY}/>
+                            <input type='checkbox' onChange={handleYEnableChanged} className='CheckBox' checked={currentSettings.alignY}/>
                             <span className='XYTitle'> Y:</span>
-                            <input type='range' value={currentSettings.yPercent} onChange={handleYChanged} className='Slider VerticalSlider FillFlex' disabled={!currentSettings.AlignY}/>
-                            <input type='number' value={currentSettings.yPercent} onInput={handleYChanged} className='PercentBox' disabled={!currentSettings.AlignY}/>
+                            <input type='range' value={currentSettings.yPercent} onChange={handleYChanged} className='Slider VerticalSlider FillFlex' disabled={!currentSettings.alignY}/>
+                            <input type='number' value={(currentSettings.yPercent).toString()} onChange={handleYChanged} className='PercentBox' disabled={!currentSettings.alignY}/>
                             <span>%</span>
                         </div>
                     </div>
