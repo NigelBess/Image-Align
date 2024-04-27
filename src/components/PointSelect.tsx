@@ -1,5 +1,5 @@
 import React, { useEffect, MouseEventHandler, FC, useState, useRef} from 'react';
-import {Point,Size} from '../DataObjects'
+import {Point,Size, Crop, DefaultCrop, Inset} from '../DataObjects'
 import * as Helpers from '../Helpers'
 
 
@@ -8,7 +8,14 @@ interface IPointSelectProperties {
     src:string
     displayX:boolean
     displayY:boolean
-    pointsChanged:(points: Point[])=>void
+    crop:Crop//expects the crop as image pixel coordinates
+    pointsChanged:(points: Point[])=>void//returns the points in image pixel coordinates
+}
+
+interface ImageSizes
+{
+    htmlSize:Size//size of the image in display pixels on screen (not equal to image size if the image is zoomed in/out)
+    imgSize:Size//size of the actual image data
 }
 
 function GetRelativePositionPx(event:React.MouseEvent<HTMLElement>):[number,number]
@@ -21,11 +28,12 @@ function GetRelativePositionPx(event:React.MouseEvent<HTMLElement>):[number,numb
 
 
 
-export const PointSelect: FC<IPointSelectProperties> = ({src,displayX,displayY,pointsChanged}) => {  
+export const PointSelect: FC<IPointSelectProperties> = ({src,displayX,displayY,crop,pointsChanged}) => {  
   
     const maxPoints:number = 1//set this to 2 in the future when we want to allow 2-point select
     const [points,setPoints] = useState<Array<Point>>([])
     const [lockedPointCount,setLockedPointCount] = useState<number>(0)
+    const [inset,setInset] = useState<Inset>()
 
     const img = useRef<HTMLImageElement>(null)
 
@@ -33,12 +41,29 @@ export const PointSelect: FC<IPointSelectProperties> = ({src,displayX,displayY,p
 
     useEffect(()=>{
         ClearSelection()
+        ResetCrop()
     },[src])
+
+    useEffect(()=>{
+        if(!img.current) return
+        const sizes = ExtractImageSizes(img.current as HTMLImageElement)
+        const inset = ConvertIncomingCrop(crop,sizes)
+        setInset(inset)
+    },[crop])
 
     function ClearSelection()
     {
         setLockedPointCount(0)
         setPoints([])
+    }
+
+    function ResetCrop()
+    {
+        if(!img.current) return
+        const sizes = ExtractImageSizes(img.current as HTMLImageElement)
+        const fullCrop = Helpers.GenerateFullImageCrop(sizes.htmlSize)
+        const inset = Helpers.CropToInset(fullCrop,sizes.htmlSize)
+        setInset(inset)
     }
 
     function unlockedPoints():number{// gives number of crosshairs currently not locked in
@@ -70,31 +95,32 @@ export const PointSelect: FC<IPointSelectProperties> = ({src,displayX,displayY,p
   function broadcastPoints(pointCount:number)
   {
     if (!img.current) throw new Error("attempting to select points on a non-existing image. This is likely a bug");
-    const preparedPoints = points.slice(0, pointCount).map(p=>PreparePointForExport(p,img.current as HTMLImageElement))
-    console.log(preparedPoints[0].x)
+    const sizes = ExtractImageSizes(img.current as HTMLImageElement);
+    const preparedPoints = points.slice(0, pointCount).map(p=>PreparePointForExport(p,sizes))
     pointsChanged(preparedPoints)
   }
 
-  function PreparePointForExport(point:Point, image:HTMLImageElement):Point
+  function ExtractImageSizes(image:HTMLImageElement):ImageSizes
+  {
+    return {htmlSize:{width:image.width,height:image.height},imgSize:{width:image.naturalWidth,height:image.naturalHeight}}
+  }
+
+  function PreparePointForExport(point:Point, sizes:ImageSizes):Point
   //converts point in html/screen coordinates to image coordinates
   { 
-        const htmlSize:Size = {width:image.width,height:image.height}
-        const imgSize:Size = {width:image.naturalWidth,height:image.naturalHeight}
-        point = convertPointToImagePixelLocations(point,htmlSize,imgSize)
-        point = Helpers.FlipVerticalAxis(point,imgSize)
+        point = Helpers.ConvertPointToNewSize(point,sizes.htmlSize,sizes.imgSize)
+        point = Helpers.FlipVerticalAxis(point,sizes.imgSize)
         return point
   }
-  function convertPointToImagePixelLocations(point:Point,imageSizeHTML:Size, imageSizeActual:Size):Point
-  {
-    
-    const x = convert(point.x,imageSizeHTML.width,imageSizeActual.width)
-    const y = convert(point.y,imageSizeHTML.height,imageSizeActual.height)
 
-    function convert(pixelValue:number,oldRange:number,newRange:number):number{
-        return pixelValue*newRange/oldRange
-    }
-    return {x:x,y:y};
+  function ConvertIncomingCrop(incoming:Crop,sizes:ImageSizes):Inset
+  {
+    let newCrop = Helpers.ConvertCropToNewSize(incoming, sizes.imgSize,sizes.htmlSize)
+    const inset = Helpers.CropToInset(newCrop,sizes.htmlSize)
+    return inset
   }
+
+
 
   const handleMouseLeave: MouseEventHandler<HTMLElement> = (event) =>  {
         //delete the horizontal and vertical lines currently following the cursor
@@ -108,8 +134,13 @@ export const PointSelect: FC<IPointSelectProperties> = ({src,displayX,displayY,p
   return (
     <div>
         <span className='stack'>
-            <img className='PrimaryImage' src={src} ref={img} onMouseLeave={handleMouseLeave} onMouseMove={handleMouseMove} onClick={handleCLick}
-            ></img>
+            <img className='PrimaryImage' src={src}
+            style={{
+                opacity:"0.5"
+            }}/>
+            <img className='PrimaryImage' src={src} ref={img} onMouseLeave={handleMouseLeave} onMouseMove={handleMouseMove} onClick={handleCLick}style={{
+                clipPath: `inset( ${inset?.top}px ${inset?.right}px ${inset?.bottom}px ${inset?.left}px)`,//Top right bottom left
+            }}/>
             {points.map((point,index)=>
             <React.Fragment key={index}>
                     <div className="TargetLine" style={{/*vertical line: defines X positioning*/

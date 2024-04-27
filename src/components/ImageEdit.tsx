@@ -5,8 +5,10 @@ import step2Arrow from '../img/step2Arrow.png';
 import step3Arrow from '../img/step3Arrow.png';
 import { PointSelect} from './PointSelect';
 import { Toolbox, AlignmentSettings } from './Toolbox';
-import * as Helpers from '../Helpers'
-import {Point,Size} from '../DataObjects'
+import {Round, PixelToPercent,PercentToRatio} from '../Helpers'
+import  {Point,Size,Crop,DefaultCrop} from '../DataObjects'
+import {Dim,ConvertToDims,CalculateNewDim} from '../Dimension'
+import { off } from 'process';
 
 
 export const ImageEdit: React.FC = () => {
@@ -14,15 +16,17 @@ export const ImageEdit: React.FC = () => {
     const [tutorialStep, setTutorialStep] = useState<number>(1);
     const [showTutorial, setShowTutorial] = useState<boolean>(true);
     const [isToolboxSticky, setToolboxSticky] = useState<boolean>(false);
-    const [alignmentSettings,setAlignmentSettings] = useState<AlignmentSettings>({AlignX:true,AlignY:true,X:0,Y:0});
+    const [alignmentSettings,setAlignmentSettings] = useState<AlignmentSettings>({AlignX:true,AlignY:true,xPercent:0,yPercent:0});
+    const [crop,setCrop] = useState<Crop>(DefaultCrop())
 
 
     const chooseImageButton = useRef(null)
-    const firstImage = useRef(null)
+    const iamgeContainer = useRef(null)
     const loadedImage = useRef<ImageBitmap|null>(null)
     const toolBox = useRef<HTMLElement>(null)
     const toolboxTopOffset = useRef(0); // To store the initial top offset of the toolbox
-
+    const focalPoint = useRef<Point>()
+    
 
     useEffect(() => {
     window.addEventListener('scroll', handleScroll);
@@ -79,17 +83,19 @@ export const ImageEdit: React.FC = () => {
     function handlePointsChanged(points:Point[])
     {
         if(!points) return;
-        if(loadedImage.current) InitializeAlignmentSettings(points[0],loadedImage.current);
+        const point = points[0]
+        focalPoint.current = point
+        if(loadedImage.current) InitializeAlignmentSettings(point,loadedImage.current);
         MoveTutorialStep(3)
     }
 
     function InitializeAlignmentSettings(point:Point, image:ImageBitmap)
     {
         const size:Size = {width:image.width, height:image.height}
-        point = Helpers.PixelToPercent(point,size)
-        const x = Helpers.Round(point.x)
-        const y =  Helpers.Round(point.y)
-        setAlignmentSettings(old=>({...old,X:x,Y:y}))
+        point = PixelToPercent(point,size)
+        const x = Round(point.x)
+        const y =  Round(point.y)
+        setAlignmentSettings(old=>({...old,xPercent:x,yPercent:y}))
     }
 
     function showToolBar():boolean
@@ -103,8 +109,32 @@ export const ImageEdit: React.FC = () => {
     {
         setAlignmentSettings(newSettings)
         MoveTutorialStep(4)
-        console.log("Recalculate Triggered")
+        RecalculateCrop(newSettings)
     }
+
+    //updates the crop info from the user selected alignment settings
+    function RecalculateCrop(alignment:AlignmentSettings)
+    {
+        if(!loadedImage.current) return;
+        if(!focalPoint.current) return;
+
+        const pointPixel = focalPoint.current
+        const img = loadedImage.current;
+        const imgSizePixels:Size = {width:img.width,height:img.height}         
+        const pointPercent = PixelToPercent(pointPixel,imgSizePixels)
+
+        let [xDim,yDim] = ConvertToDims(pointPixel,imgSizePixels)
+        xDim = CalculateNewDim(xDim,PercentToRatio(alignment.xPercent))
+        yDim = CalculateNewDim(yDim,PercentToRatio(alignment.yPercent))
+        
+        const offsetX = pointPixel.x - xDim.x
+        const offsetY = pointPixel.y - yDim.x
+        const newCrop:Crop = {point:{x:offsetX,y:offsetY},size:{width:xDim.length,height:yDim.length}}
+        setCrop(newCrop)
+
+    }
+
+    
 
     return (       
         <div className='OuterContainer Shadow'>
@@ -114,7 +144,7 @@ export const ImageEdit: React.FC = () => {
                 <span className='StepText'  >Choose an image you want to align</span>
             </div>           
         </Overlay>
-        <Overlay targetRef={firstImage} direction={OverlayDirection.Right}> 
+        <Overlay targetRef={iamgeContainer} direction={OverlayDirection.Right}> 
             <div className='StackPanel PulseGradient' style={{ visibility: showTutorialStep(2) ? "visible" : "hidden" }} >
                 <span className='StepText' >Select the point you want to align</span>
                 <img className='ArrowImage' src={step2Arrow} style={{height:"70px", width:"auto", float:"left"}} />
@@ -130,8 +160,8 @@ export const ImageEdit: React.FC = () => {
             <div id='ImageColumn'>
                 <div className="StackPanel ">
                     <input ref={chooseImageButton} className='ImageUploadButton' type="file" accept="image/*" onChange={changeImage} />
-                    <span ref={firstImage} id="uploadedImage" className="FillHorizontal" style={{ visibility: imagePath ? "visible" : "hidden" }} >
-                        <PointSelect  src={imagePath} displayX={alignmentSettings.AlignX} displayY={alignmentSettings.AlignY} pointsChanged={handlePointsChanged}/>
+                    <span ref={iamgeContainer} id="uploadedImage" className="FillHorizontal" style={{ visibility: imagePath ? "visible" : "hidden" }} >
+                        <PointSelect crop={crop} src={imagePath} displayX={alignmentSettings.AlignX} displayY={alignmentSettings.AlignY} pointsChanged={handlePointsChanged}/>
                     </span>
                     
                     
