@@ -17,7 +17,7 @@ export const App:React.FC = () => {
       <div  className='CoffeeButtonContainer'>
         <BuyMeACoffee/>
       </div>
-      <div className='Footer'></div>
+      <div className='Footer'>© 2024 Nigel Bess</div>
     </div>
 
   );
