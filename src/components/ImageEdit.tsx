@@ -172,10 +172,12 @@ export const ImageEdit: React.FC = () => {
                     
                 </div>
             </div>
-            <div className='ToolColumn' onMouseDown={handleClickedToolColumn} style={{ visibility: showToolBar() ? "visible" : "hidden" }}>
+            <div className='ToolColumn StackPanel' onMouseDown={handleClickedToolColumn} style={{ visibility: showToolBar() ? "visible" : "hidden" }}>
                 <span className={isToolboxSticky ? 'sticky' : ''} ref={toolBox}>
                     <Toolbox alignmentSettings={alignmentSettings}  alignmentSettingsChanged={handleAlignmentSettingsChanged}/>                    
                 </span>
+
+                <span></span>
                 
             </div>
         </div>

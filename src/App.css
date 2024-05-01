@@ -1,8 +1,28 @@
 @import url('https://fonts.googleapis.com/css2?family=Neucha&display=swap');
 
+:root{
+    --DOL-background: 	hsl(28, 59%, 88%);
+    --DOL-shadow: hsl(35, 69%, 67%);
+    --DOL-Text:	hsl(184, 32%, 40%);
+    --DOL-Info:	hsl(28, 75%, 63%);
+
+
+    --LOD-background: 	hsl(184, 22%, 70%);
+    --LOD-Text: #FFF;
+
+    --ButtonHue:184;
+    --ButtonSaturation:55%;
+    --SaveButtonHue:118;
+    --ButtonLightness:37%;
+    --ButtonHoverLightness:45%;
+    --ButtonClickeLightness:28%;
+
+    --MED-background:#e89c5b;
+}
+
 body {
     margin: 0;
-    background-image: linear-gradient(to bottom right, #963b3b, #4d411d);
+    background-image: linear-gradient(to bottom right, var(--DOL-background), var(--DOL-shadow));
     background-attachment: fixed;
     font-size: 40px;
     height: 100%;
@@ -14,8 +34,23 @@ body {
     flex-direction: column;
     align-items: center;
     font-family: "Neucha", cursive;
-    color: white;
+    color:var(--LOD-Text);
 }
+.OuterContainer
+{
+    background-color:  var(--LOD-background);
+    padding: 50px;
+    width: 90%;
+    height: auto;
+    display: flex;
+    min-height: 600px;
+}
+.TopBar
+{
+    background-color: var(--MED-background);
+    width: 100%;
+}
+
 .PrimaryImage
 {
     width: 100%;
@@ -49,7 +84,7 @@ body {
 .TargetLine
 {
     position: relative;
-    background-color: #F006;
+    background-color: #963F3B;
     pointer-events: none;
     box-shadow: 0 0 10px #FFF;
     border: 1px solid #ffffff85;
@@ -152,6 +187,7 @@ body {
     height: 40px;
     font-size: 20px;
     margin: 0 20px;
+    text-align: center;
 }
 .XYTitle
 {
@@ -165,7 +201,7 @@ body {
 
 .HomebrewButton
 {
-    background-color: #1e56a0;
+    background-color: hsl(var(--ButtonHue), var(--ButtonSaturation), var(--ButtonLightness));
     border-radius: 20px;
     cursor: pointer;
     padding: 20px;
@@ -178,12 +214,53 @@ body {
 }
 .HomebrewButton:hover
 {
-    background-color: #2778e2;
+    background-color: hsl(var(--ButtonHue), var(--ButtonSaturation), var(--ButtonHoverLightness));
 }
 .HomebrewButton:active
 {
-    background-color: #174179;
+    background-color: hsl(var(--ButtonHue), var(--ButtonSaturation), var(--ButtonClickeLightness));
 }
+
+.SaveButton
+{
+    background-color: hsl(var(--SaveButtonHue), var(--ButtonSaturation), var(--ButtonLightness));
+}
+.SaveButton:hover
+{
+    background-color: hsl(var(--SaveButtonHue), var(--ButtonSaturation), var(--ButtonHoverLightness));
+}
+.SaveButton:active
+{
+    background-color: hsl(var(--SaveButtonHue), var(--ButtonSaturation), var(--ButtonClickeLightness));
+}
+
+.TransparentButton
+{
+    background-color: hsl(0, 0%, 0%,0);
+    cursor: pointer;
+    padding: 6px;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    font-size: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: inherit;
+}
+.TransparentButton:hover
+{
+    background-color: hsl(0, 0%, 100%,.1);
+}
+.TransparentButton:active
+{
+    background-color: hsl(0, 0%, 0%,.1);
+}
+
 .StepText
 {
     display: inline;
@@ -191,20 +268,19 @@ body {
     align-self: center;
 }
 
+.Icon
+{
+    height: 35px;
+    object-fit: contain;
+    margin:2px 5px;
+}
+
 .GradientBase
 {
     width: fit-content;
     background-image: radial-gradient(ellipse at center, #0007 0%,transparent 70%);
 }
-.OuterContainer
-{
-    background-color:  #3b9296;
-    padding: 50px;
-    width: 90%;
-    height: auto;
-    display: flex;
-    min-height: 600px;
-}
+
 #ImageColumn
 {
     width: 70%;
@@ -255,15 +331,15 @@ body {
     text-transform: uppercase;
     font-size: 100px;
     padding: 30px 0;
-    color: white;
     z-index: 1;
     text-align: center;
+    color:var(--DOL-Text)
 }
 .SubHeading
 {
     font-size: 50px;
-    color: white;
     margin: 0 0px 30px 0;
+    color:var(--DOL-Info)
 }
 .CoffeeButtonImage
 {
@@ -280,4 +356,8 @@ body {
     bottom:0;
     position: fixed;
 
+}
+.FloatRight
+{
+    float:right
 }
