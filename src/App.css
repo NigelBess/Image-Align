@@ -18,6 +18,8 @@
     --ButtonClickeLightness:28%;
 
     --MED-background:#e89c5b;
+
+    --Highlight:#FEDD01;
 }
 
 body {
@@ -344,6 +346,7 @@ body {
 .CoffeeButtonImage
 {
     max-height: 60px;
+    border-radius: 10px;
 }
 
 .CoffeeButtonContainer
@@ -355,6 +358,7 @@ body {
     right: 0;
     bottom:0;
     position: fixed;
+    
 
 }
 .FloatRight

@@ -139,6 +139,16 @@ export const ImageEdit: React.FC = () => {
 
     }
 
+    function handleSave()
+    {
+
+    }
+
+    function CanSave():boolean
+    {
+        return loadedImage.current!=null && crop !=null
+    }
+
     
 
     return (       
@@ -173,11 +183,13 @@ export const ImageEdit: React.FC = () => {
                 </div>
             </div>
             <div className='ToolColumn StackPanel' onMouseDown={handleClickedToolColumn} style={{ visibility: showToolBar() ? "visible" : "hidden" }}>
-                <span className={isToolboxSticky ? 'sticky' : ''} ref={toolBox}>
-                    <Toolbox alignmentSettings={alignmentSettings}  alignmentSettingsChanged={handleAlignmentSettingsChanged}/>                    
-                </span>
-
-                <span></span>
+                <div className='AlignSelfCenter'>
+                    <span className={isToolboxSticky ? 'sticky' : ''} ref={toolBox}>
+                        <Toolbox alignmentSettings={alignmentSettings}  alignmentSettingsChanged={handleAlignmentSettingsChanged}/>                    
+                    </span>
+                </div>
+                <div style={{height:'60px'}}></div>
+                <div className='HomebrewButton Shadow SaveButton AlignSelfCenter' onClick={handleSave} style={{ visibility: CanSave() ? "visible" : "hidden" }}>Save</div>
                 
             </div>
         </div>
