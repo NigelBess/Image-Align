@@ -83,10 +83,9 @@ export const ImageEdit: React.FC = () => {
         return show
     }
 
-    function handlePointsChanged(points:Point[])
+    function handlePointChanged(point:Point|null)
     {
-        if(!points) return;
-        const point = points[0]
+        if(!point) return;
         focalPoint.current = point
         if(loadedImage) InitializeAlignmentSettings(point,loadedImage);
         MoveTutorialStep(3)
@@ -176,7 +175,7 @@ export const ImageEdit: React.FC = () => {
                 <div className="StackPanel ">
                     <input ref={chooseImageButton} className='ImageUploadButton' type="file" accept="image/*" onChange={changeImage} />
                     <span ref={iamgeContainer} id="uploadedImage" className="FillHorizontal" style={{ visibility: isImageLoaded ? "visible" : "hidden" }} >
-                        <PointSelect crop={crop} src={loadedImage} displayX={alignmentSettings.alignX} displayY={alignmentSettings.alignY} pointsChanged={handlePointsChanged}/>
+                        <PointSelect crop={crop} src={loadedImage} displayX={alignmentSettings.alignX} displayY={alignmentSettings.alignY} pointChanged={handlePointChanged}/>
                     </span>
                     
                     
