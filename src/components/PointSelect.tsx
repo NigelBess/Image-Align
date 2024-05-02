@@ -112,7 +112,6 @@ export const PointSelect: FC<IPointSelectProperties> = ({src,displayX,displayY,c
         const mainLineColor = "#F00"
         const secondLineColor = "#700"
         RenderSelectionPoint(lockedPoint.current,mainLineColor)
-        console.log(`locked x,y: ${lockedPoint.current?.x}, ${lockedPoint.current?.y}`)
         const hoverPointColor =lockedPoint.current==null?mainLineColor:secondLineColor
         RenderSelectionPoint(hoverPoint.current,hoverPointColor)
         
@@ -181,8 +180,9 @@ export const PointSelect: FC<IPointSelectProperties> = ({src,displayX,displayY,c
 
   function broadcastPoint()
   {
-    if(canvas.current == null) return
+    if(canvas.current == null) return;
     let point = lockedPoint.current
+    if(point != null)    point = Helpers.TLtoBLPoint(point,src.height);
     pointChanged(point)
   }
 
