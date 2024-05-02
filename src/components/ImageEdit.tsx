@@ -14,7 +14,8 @@ export const ImageEdit: React.FC = () => {
     const [tutorialStep, setTutorialStep] = useState<number>(1);
     const [showTutorial, setShowTutorial] = useState<boolean>(true);
     const [isToolboxSticky, setToolboxSticky] = useState<boolean>(false);
-    const [alignmentSettings,setAlignmentSettings] = useState<AlignmentSettings>({alignX:true,alignY:true,xPercent:0,yPercent:0,useSize:false,size:DefaultSize()});
+    const [writeOnlyAlignmentSettings,setWOAlignmentSettings] = useState<AlignmentSettings>({alignX:true,alignY:true,xPercent:0,yPercent:0,useSize:false,size:DefaultSize()});
+    const [readonlyAlignmentSettings,setROAlignmentSettings] = useState<AlignmentSettings>({alignX:true,alignY:true,xPercent:0,yPercent:0,useSize:false,size:DefaultSize()});
     const [crop,setCrop] = useState<Crop>(DefaultCrop())
     const [loadedImage,setLoadedImage] = useState<HTMLImageElement>(document.createElement('img'))
     const [isImageLoaded,setImageLoaded] = useState<boolean>(false)
@@ -97,7 +98,7 @@ export const ImageEdit: React.FC = () => {
         point = PixelToPercent(point,size)
         const x = Round(point.x)
         const y =  Round(point.y)
-        setAlignmentSettings(old=>({...old,xPercent:x,yPercent:y}))
+        setWOAlignmentSettings(old=>({...old,xPercent:x,yPercent:y}))
     }
 
     function showToolBar():boolean
@@ -110,6 +111,7 @@ export const ImageEdit: React.FC = () => {
     function handleAlignmentSettingsChanged(newSettings:AlignmentSettings)
     {
         RecalculateCrop(newSettings)
+        setROAlignmentSettings(newSettings)
     }
 
     function handleClickedToolColumn()
@@ -174,7 +176,7 @@ export const ImageEdit: React.FC = () => {
                 <div className="StackPanel ">
                     <input ref={chooseImageButton} className='ImageUploadButton' type="file" accept="image/*" onChange={changeImage} />
                     <span ref={iamgeContainer} id="uploadedImage" className="FillHorizontal" style={{ visibility: isImageLoaded ? "visible" : "hidden" }} >
-                        <PointSelect crop={crop} src={loadedImage} displayX={alignmentSettings.alignX} displayY={alignmentSettings.alignY} pointChanged={handlePointChanged}/>
+                        <PointSelect crop={crop} src={loadedImage} displayX={readonlyAlignmentSettings.alignX} displayY={readonlyAlignmentSettings.alignY} pointChanged={handlePointChanged}/>
                     </span>
                     
                     
@@ -183,7 +185,7 @@ export const ImageEdit: React.FC = () => {
             <div className='ToolColumn StackPanel' onMouseDown={handleClickedToolColumn} style={{ visibility: showToolBar() ? "visible" : "hidden" }}>
                 <div className='AlignSelfCenter'>
                     <span className={isToolboxSticky ? 'sticky' : ''} ref={toolBox}>
-                        <Toolbox alignmentSettings={alignmentSettings}  alignmentSettingsChanged={handleAlignmentSettingsChanged}/>                    
+                        <Toolbox alignmentSettings={writeOnlyAlignmentSettings}  alignmentSettingsChanged={handleAlignmentSettingsChanged}/>                    
                     </span>
                 </div>
                 <div style={{height:'60px'}}></div>

@@ -80,27 +80,33 @@ export const PointSelect: FC<IPointSelectProperties> = ({src,displayX,displayY,c
         context.drawImage(src,0,0,width,height)
         const sizes = ExtractImageSizes(src,c)
 
-        function RenderSelectionPoint(point:Point|null)
+        function RenderSelectionPoint(point:Point|null,color:string)
         {
             if(!point) return
             const canvasPoint = Helpers.ConvertPointToNewSize(point,sizes.imgSize,sizes.canvasSize)
-            if(displayX) context.fillRect(canvasPoint.x,0,1,height)
+            context.fillStyle = color
+            if(displayX) context.fillRect(canvasPoint.x,0,1,height)            
             if(displayY) context.fillRect(0,canvasPoint.y,width,1)
         }
 
         //draw lines for point selection
-        RenderSelectionPoint(hoverPoint.current)
-        RenderSelectionPoint(lockedPoint.current)
+        const mainLineColor = "#F00"
+        const secondLineColor = "#700"
+        RenderSelectionPoint(lockedPoint.current,mainLineColor)
+        const hoverPointColor =lockedPoint.current==null?mainLineColor:secondLineColor
+        RenderSelectionPoint(hoverPoint.current,hoverPointColor)
+        
 
 
         //draw crop overlay
         function RenderCrop(crop:Crop)
         {
             if(!crop) return
-            
-            //const inset = Helpers.CropToInset(crop,sizes.htmlSize,sizes.imgSize)
+            const inset = ConvertCrop(crop,sizes)
             //draw 4 rectangles to overlay crop
+
             //top rectangle
+
         }
 
     }
@@ -158,15 +164,7 @@ export const PointSelect: FC<IPointSelectProperties> = ({src,displayX,displayY,c
     return {canvasSize:{width:canvas.width,height:canvas.height},imgSize:{width:image.naturalWidth,height:image.naturalHeight}}
   }
 
-  function PreparePointForExport(point:Point, sizes:ImageSizes):Point
-  //converts point in html/screen coordinates to image coordinates
-  { 
-        point = Helpers.ConvertPointToNewSize(point,sizes.canvasSize,sizes.imgSize)
-        point = Helpers.FlipVerticalAxis(point,sizes.imgSize)
-        return point
-  }
-
-  function ConvertIncomingCrop(incoming:Crop,sizes:ImageSizes):Inset
+  function ConvertCrop(incoming:Crop,sizes:ImageSizes):Inset
   {
     let newCrop = Helpers.ConvertCropToNewSize(incoming, sizes.imgSize,sizes.canvasSize)
     const inset = Helpers.CropToInset(newCrop,sizes.canvasSize)
