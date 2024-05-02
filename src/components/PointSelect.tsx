@@ -8,35 +8,33 @@ interface IPointSelectProperties {
     src:HTMLImageElement
     displayX:boolean
     displayY:boolean
-    crop:Crop//expects the crop as image pixel coordinates
+    crop:Crop|null//expects the crop as image pixel coordinates
     pointChanged:(points: Point|null)=>void//returns the points in image pixel coordinates
 }
 
 interface ImageSizes
 {
-    htmlSize:Size//size of the image in display pixels on screen (not equal to image size if the image is zoomed in/out)
+    canvasSize:Size//size of the image in display pixels on screen (not equal to image size if the image is zoomed in/out)
     imgSize:Size//size of the actual image data
 }
 
-function GetRelativePositionPx(event:React.MouseEvent<HTMLElement>):Point
+function GetRelativePositionPx(event:React.MouseEvent<HTMLElement>,sizes:ImageSizes):Point//returns relative position in image pixel coordinates
 {
     const rect = event.currentTarget.getBoundingClientRect();
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
-    return {x,y}
+    const canvasPoint:Point =  {x,y}
+    return Helpers.ConvertPointToNewSize(canvasPoint,sizes.canvasSize,sizes.imgSize)
 }
 
 
 
 export const PointSelect: FC<IPointSelectProperties> = ({src,displayX,displayY,crop,pointChanged}) => {  
   
-    const maxPoints:number = 1//set this to 2 in the future when we want to allow 2-point select
-    const [inset,setInset] = useState<Inset>()
-
     const canvas = useRef<HTMLCanvasElement>(null)
     const zoom = useRef<number>(1)
-    const lockedPoint = useRef<Point | null>(null)
-    const hoverPoint = useRef<Point | null> (null)
+    const lockedPoint = useRef<Point | null>(null)//stored in image pixel coordinates
+    const hoverPoint = useRef<Point | null> (null)//stored in image pixel coordinates
     
     function canvasContext():CanvasRenderingContext2D
     {
@@ -57,8 +55,7 @@ export const PointSelect: FC<IPointSelectProperties> = ({src,displayX,displayY,c
 
 
     useEffect(()=>{
-        const sizes = ExtractImageSizes(src as HTMLImageElement)
-        const inset = ConvertIncomingCrop(crop,sizes)
+        Draw()
     },[crop])
 
 
@@ -72,20 +69,23 @@ export const PointSelect: FC<IPointSelectProperties> = ({src,displayX,displayY,c
     }
 
     function Draw()
-    {   const c = canvas.current
-        if (!c) throw Error("Canvas not found");
+    {   
+        if (!canvas.current) throw Error("Canvas not found");
+        const c = canvas.current as HTMLCanvasElement
         const width = src.width*zoom.current
         const height = src.height*zoom.current
         c.width = width
         c.height = height
         const context = canvasContext()
         context.drawImage(src,0,0,width,height)
+        const sizes = ExtractImageSizes(src,c)
 
         function RenderSelectionPoint(point:Point|null)
         {
             if(!point) return
-            if(displayX) context.fillRect(point.x,0,1,height)
-            if(displayY) context.fillRect(0,point.y,width,1)
+            const canvasPoint = Helpers.ConvertPointToNewSize(point,sizes.imgSize,sizes.canvasSize)
+            if(displayX) context.fillRect(canvasPoint.x,0,1,height)
+            if(displayY) context.fillRect(0,canvasPoint.y,width,1)
         }
 
         //draw lines for point selection
@@ -94,8 +94,18 @@ export const PointSelect: FC<IPointSelectProperties> = ({src,displayX,displayY,c
 
 
         //draw crop overlay
+        function RenderCrop(crop:Crop)
+        {
+            if(!crop) return
+            
+            //const inset = Helpers.CropToInset(crop,sizes.htmlSize,sizes.imgSize)
+            //draw 4 rectangles to overlay crop
+            //top rectangle
+        }
 
     }
+
+
 
     
 
@@ -106,11 +116,8 @@ export const PointSelect: FC<IPointSelectProperties> = ({src,displayX,displayY,c
     }
 
     function ResetCrop()
-    {
-        const sizes = ExtractImageSizes(src)
-        const fullCrop = Helpers.GenerateFullImageCrop(sizes.htmlSize)
-        const inset = Helpers.CropToInset(fullCrop,sizes.htmlSize)
-        setInset(inset)
+    {  
+        crop = null
     }
 
 
@@ -120,8 +127,10 @@ export const PointSelect: FC<IPointSelectProperties> = ({src,displayX,displayY,c
         handleCLick(event)
         return;
         } 
+    if(canvas.current == null || src==null) return
+    const sizes = ExtractImageSizes(src,canvas.current)
 
-    const point = GetRelativePositionPx(event)
+    const point = GetRelativePositionPx(event,sizes)
     let toChange = hoverPoint
     
     toChange.current = point
@@ -131,7 +140,9 @@ export const PointSelect: FC<IPointSelectProperties> = ({src,displayX,displayY,c
 
 
   const handleCLick:MouseEventHandler<HTMLElement> = (event) =>  {
-    lockedPoint.current = GetRelativePositionPx(event)
+    if(canvas.current == null || src==null) return
+    const sizes = ExtractImageSizes(src,canvas.current)
+    lockedPoint.current = GetRelativePositionPx(event,sizes)
     hoverPoint.current = null
     Draw()    
     broadcastPoint()
@@ -142,23 +153,23 @@ export const PointSelect: FC<IPointSelectProperties> = ({src,displayX,displayY,c
     pointChanged(lockedPoint.current)
   }
 
-  function ExtractImageSizes(image:HTMLImageElement):ImageSizes
+  function ExtractImageSizes(image:HTMLImageElement, canvas:HTMLCanvasElement):ImageSizes
   {
-    return {htmlSize:{width:image.width,height:image.height},imgSize:{width:image.naturalWidth,height:image.naturalHeight}}
+    return {canvasSize:{width:canvas.width,height:canvas.height},imgSize:{width:image.naturalWidth,height:image.naturalHeight}}
   }
 
   function PreparePointForExport(point:Point, sizes:ImageSizes):Point
   //converts point in html/screen coordinates to image coordinates
   { 
-        point = Helpers.ConvertPointToNewSize(point,sizes.htmlSize,sizes.imgSize)
+        point = Helpers.ConvertPointToNewSize(point,sizes.canvasSize,sizes.imgSize)
         point = Helpers.FlipVerticalAxis(point,sizes.imgSize)
         return point
   }
 
   function ConvertIncomingCrop(incoming:Crop,sizes:ImageSizes):Inset
   {
-    let newCrop = Helpers.ConvertCropToNewSize(incoming, sizes.imgSize,sizes.htmlSize)
-    const inset = Helpers.CropToInset(newCrop,sizes.htmlSize)
+    let newCrop = Helpers.ConvertCropToNewSize(incoming, sizes.imgSize,sizes.canvasSize)
+    const inset = Helpers.CropToInset(newCrop,sizes.canvasSize)
     return inset
   }
 
