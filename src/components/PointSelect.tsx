@@ -8,7 +8,7 @@ interface IPointSelectProperties {
     src:HTMLImageElement
     displayX:boolean
     displayY:boolean
-    crop:Rectangle|null//expects the crop as image pixel coordinates
+    crop:Rectangle|null//expects the crop as image pixel coordinates BL
     pointChanged:(points: Point|null)=>void//returns the points in image pixel coordinates
 }
 
@@ -32,6 +32,7 @@ function GetRelativePositionPx(event:React.MouseEvent<HTMLElement>,sizes:ImageSi
 export const PointSelect: FC<IPointSelectProperties> = ({src,displayX,displayY,crop,pointChanged}) => {  
   
     const canvas = useRef<HTMLCanvasElement>(null)
+    const canvasHolder = useRef<HTMLDivElement>(null);
     const zoom = useRef<number>(1)
     const lockedPoint = useRef<Point | null>(null)//stored in image pixel coordinates TL
     const hoverPoint = useRef<Point | null> (null)//stored in image pixel coordinates TL
@@ -59,6 +60,7 @@ export const PointSelect: FC<IPointSelectProperties> = ({src,displayX,displayY,c
     },[crop])
 
 
+
     function setZoom(newZoom:number)
     {
         const MIN_ZOOM = 0.05
@@ -67,7 +69,6 @@ export const PointSelect: FC<IPointSelectProperties> = ({src,displayX,displayY,c
         zoom.current = newZoom
         Draw()
     }
-
     function Draw()
     {   
         if (!canvas.current) throw Error("Canvas not found");
@@ -111,6 +112,7 @@ export const PointSelect: FC<IPointSelectProperties> = ({src,displayX,displayY,c
         const mainLineColor = "#F00"
         const secondLineColor = "#700"
         RenderSelectionPoint(lockedPoint.current,mainLineColor)
+        console.log(`locked x,y: ${lockedPoint.current?.x}, ${lockedPoint.current?.y}`)
         const hoverPointColor =lockedPoint.current==null?mainLineColor:secondLineColor
         RenderSelectionPoint(hoverPoint.current,hoverPointColor)
         
@@ -181,10 +183,6 @@ export const PointSelect: FC<IPointSelectProperties> = ({src,displayX,displayY,c
   {
     if(canvas.current == null) return
     let point = lockedPoint.current
-    if (point!=null)
-    {
-        point = Helpers.TLtoBLPoint(point,canvas.current.height)
-    }
     pointChanged(point)
   }
 
@@ -202,7 +200,8 @@ export const PointSelect: FC<IPointSelectProperties> = ({src,displayX,displayY,c
     return inset
   }
 
-  const handleWheel = (event: React.WheelEvent<HTMLCanvasElement>) => {
+  function handleWheel( event: React.WheelEvent) {
+    event.stopPropagation();
     let zoomAmount = 0;
     const zoomPerWheel = 0.05
     if (event.deltaY < 0) {
@@ -211,6 +210,7 @@ export const PointSelect: FC<IPointSelectProperties> = ({src,displayX,displayY,c
         zoomAmount = -zoomPerWheel
     }
     setZoom(zoom.current+zoomAmount)
+    
   };
 
 
@@ -221,10 +221,9 @@ export const PointSelect: FC<IPointSelectProperties> = ({src,displayX,displayY,c
   }
 
 
-
   return (
-    <div className='CanvasHolder'>
-        <canvas className="PrimaryCanvas" ref={canvas} onMouseMove={handleMouseMove} onWheel={handleWheel} onClick={handleCLick} onMouseLeave={handleMouseLeave}></canvas>
+    <div className='CanvasHolder' >
+        <canvas className="PrimaryCanvas" ref={canvas} onWheel={handleWheel} onMouseMove={handleMouseMove} onClick={handleCLick} onMouseLeave={handleMouseLeave}></canvas>
         
     </div>
     
