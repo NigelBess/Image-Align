@@ -59,7 +59,6 @@ export const PointSelect: FC<IPointSelectProperties> = ({src,displayX,displayY,c
     useEffect(()=>{
         const sizes = ExtractImageSizes(src as HTMLImageElement)
         const inset = ConvertIncomingCrop(crop,sizes)
-        setInset(inset)
     },[crop])
 
 
@@ -85,8 +84,8 @@ export const PointSelect: FC<IPointSelectProperties> = ({src,displayX,displayY,c
         function RenderSelectionPoint(point:Point|null)
         {
             if(!point) return
-            context.fillRect(point.x,0,1,height)
-            context.fillRect(0,point.y,width,1)
+            if(displayX) context.fillRect(point.x,0,1,height)
+            if(displayY) context.fillRect(0,point.y,width,1)
         }
 
         //draw lines for point selection
@@ -121,7 +120,6 @@ export const PointSelect: FC<IPointSelectProperties> = ({src,displayX,displayY,c
         handleCLick(event)
         return;
         } 
-    if (lockedPoint.current) return//if we already have all points selected, do nothing
 
     const point = GetRelativePositionPx(event)
     let toChange = hoverPoint

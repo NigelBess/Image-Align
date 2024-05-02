@@ -109,7 +109,6 @@ export const ImageEdit: React.FC = () => {
 
     function handleAlignmentSettingsChanged(newSettings:AlignmentSettings)
     {
-        setAlignmentSettings(newSettings)
         RecalculateCrop(newSettings)
     }
 
