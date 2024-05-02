@@ -94,11 +94,11 @@ export const PointSelect: FC<IPointSelectProperties> = ({src,displayX,displayY,c
             if(!point) return
             const canvasPoint = Helpers.ConvertPointToNewSize(point,sizes.imgSize,canvasSize)
             const rectangles:Rectangle[] = []
-            if(displayX) 
+            if(displayY) 
             {
                 rectangles.push(Helpers.GenerateRectangle(0,canvasPoint.y,canvasSize.width,1))
             }            
-            if(displayY)
+            if(displayX)
             {  
                 rectangles.push(Helpers.GenerateRectangle(canvasPoint.x,0,1,canvasSize.height))
             }
