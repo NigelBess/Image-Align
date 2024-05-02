@@ -1,11 +1,11 @@
 import React, { useEffect, MouseEventHandler, FC, useState, useRef} from 'react';
-import {Point,Size, Crop, DefaultCrop, Inset} from '../DataObjects'
+import {Point,Size, Crop, Inset} from '../DataObjects'
 import * as Helpers from '../Helpers'
 
 
 
 interface IPointSelectProperties {
-    src:string
+    src:HTMLImageElement
     displayX:boolean
     displayY:boolean
     crop:Crop//expects the crop as image pixel coordinates
@@ -36,13 +36,26 @@ export const PointSelect: FC<IPointSelectProperties> = ({src,displayX,displayY,c
     const [inset,setInset] = useState<Inset>()
 
     const img = useRef<HTMLImageElement>(null)
-
+    const canvas = useRef<HTMLCanvasElement>(null)
+    const zoom = useRef<number>(1)
+    
+    function canvasContext():CanvasRenderingContext2D
+    {
+        if(!canvas.current) throw Error("Canvas not found")
+        const context = canvas.current.getContext('2d')
+        if (context == null) throw Error("Canvas has no context")
+        return context
+    }
 
 
     useEffect(()=>{
         ClearSelection()
         ResetCrop()
+        zoom.current = 1
+        Draw()
     },[src])
+
+
 
     useEffect(()=>{
         if(!img.current) return
@@ -50,6 +63,31 @@ export const PointSelect: FC<IPointSelectProperties> = ({src,displayX,displayY,c
         const inset = ConvertIncomingCrop(crop,sizes)
         setInset(inset)
     },[crop])
+
+
+    function setZoom(newZoom:number)
+    {
+        const MIN_ZOOM = 0.05
+        const MAX_ZOOM = 5
+        newZoom = Helpers.clamp(newZoom,MIN_ZOOM,MAX_ZOOM)
+        zoom.current = newZoom
+        Draw()
+    }
+
+    function Draw()
+    {   const c = canvas.current
+        if (!c) throw Error("Canvas not found");
+        const width = src.width*zoom.current
+        const height = src.height*zoom.current
+        c.width = width
+        c.height = height
+        const context = canvasContext()
+        context.drawImage(src,0,0,width,height)
+        points.forEach(p => {
+            context.fillRect(p.x,0,1,height)
+            context.fillRect(0,p.y,width,1)
+        });
+    }
 
     function ClearSelection()
     {
@@ -85,6 +123,7 @@ export const PointSelect: FC<IPointSelectProperties> = ({src,displayX,displayY,c
             newPoints[newPoints.length-1] = {x,y} 
     }
     setPoints(newPoints)
+    Draw()
   }
 
   const handleCLick:MouseEventHandler<HTMLElement> = (event) =>  {
@@ -120,6 +159,17 @@ export const PointSelect: FC<IPointSelectProperties> = ({src,displayX,displayY,c
     return inset
   }
 
+  const handleWheel = (event: React.WheelEvent<HTMLCanvasElement>) => {
+    let zoomAmount = 0;
+    const zoomPerWheel = 0.05
+    if (event.deltaY < 0) {
+        zoomAmount = zoomPerWheel
+    } else if (event.deltaY > 0) {
+        zoomAmount = -zoomPerWheel
+    }
+    setZoom(zoom.current+zoomAmount)
+  };
+
 
 
   const handleMouseLeave: MouseEventHandler<HTMLElement> = (event) =>  {
@@ -127,39 +177,14 @@ export const PointSelect: FC<IPointSelectProperties> = ({src,displayX,displayY,c
         const unlocked = unlockedPoints()
         if (unlocked<=0) return
         setPoints(points.slice(0,-unlocked))
+        Draw()
   }
 
 
 
   return (
-    <div>
-        <span className='stack'>
-            <img className='PrimaryImage' src={src}
-            style={{
-                opacity:"0.5"
-            }}/>
-            <img className='PrimaryImage' src={src} ref={img} onMouseLeave={handleMouseLeave} onMouseMove={handleMouseMove} onClick={handleCLick}style={{
-                clipPath: `inset( ${inset?.top}px ${inset?.right}px ${inset?.bottom}px ${inset?.left}px)`,//Top right bottom left
-            }}/>
-            {points.map((point,index)=>
-            <React.Fragment key={index}>
-                    <div className="TargetLine" style={{/*vertical line: defines X positioning*/
-                        top: 0,
-                        left: point.x,
-                        width: '1px',
-                        height: '100%',
-                        visibility: displayX ? "visible":"hidden",
-                    }} />
-                    <div className="TargetLine" style={{/*horizontal line: defines Y positioning*/
-                        left: 0,
-                        top: point.y,
-                        width: '100%',
-                        height: '1px',
-                        visibility: displayY ? "visible":"hidden",
-                    }} />
-                </React.Fragment>
-            )}
-        </span>
+    <div className='CanvasHolder'>
+        <canvas className="PrimaryCanvas" ref={canvas} onMouseMove={handleMouseMove} onWheel={handleWheel} onClick={handleCLick} onMouseLeave={handleMouseLeave}></canvas>
         
     </div>
     

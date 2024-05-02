@@ -11,24 +11,25 @@ import {ConvertToDims,CalculateNewDim} from '../Dimension'
 
 
 export const ImageEdit: React.FC = () => {
-    const [imagePath, setImagePath] = useState<string >('');
     const [tutorialStep, setTutorialStep] = useState<number>(1);
     const [showTutorial, setShowTutorial] = useState<boolean>(true);
     const [isToolboxSticky, setToolboxSticky] = useState<boolean>(false);
     const [alignmentSettings,setAlignmentSettings] = useState<AlignmentSettings>({alignX:true,alignY:true,xPercent:0,yPercent:0,useSize:false,size:DefaultSize()});
     const [crop,setCrop] = useState<Crop>(DefaultCrop())
+    const [loadedImage,setLoadedImage] = useState<HTMLImageElement>(document.createElement('img'))
+    const [isImageLoaded,setImageLoaded] = useState<boolean>(false)
 
 
     const chooseImageButton = useRef(null)
     const iamgeContainer = useRef(null)
-    const loadedImage = useRef<ImageBitmap|null>(null)
     const toolBox = useRef<HTMLElement>(null)
     const toolboxTopOffset = useRef(0); // To store the initial top offset of the toolbox
     const focalPoint = useRef<Point>()
-    
+
 
     useEffect(() => {
     window.addEventListener('scroll', handleScroll);
+
 
     return () => {
         window.removeEventListener('scroll', handleScroll);
@@ -36,29 +37,30 @@ export const ImageEdit: React.FC = () => {
     }, []);
 
 
-    const changeImage= (event: React.ChangeEvent<HTMLInputElement>) => {
+    async function changeImage(event: React.ChangeEvent<HTMLInputElement>) {
         const imageFile = event.target.files ? event.target.files[0] : null;
         if (!imageFile) return
 
         const url = URL.createObjectURL(imageFile);
-        LoadImage(url,OnLoadedImage)
-        MoveTutorialStep(2)
-        setImagePath(url)        
+        LoadImage(url,handleImageLoaded)
+        MoveTutorialStep(2)    
     }
 
-    async function LoadImage(url:string,callback:(image:ImageBitmap)=>void)
+    function LoadImage(url:string,callback:(img:HTMLImageElement)=> void)
     {
-        const response = await fetch(url);    
-        if (!response.ok) return null
-        const imageBlob = await response.blob()
-        const image = await createImageBitmap(imageBlob)
-        callback(image)
+        const img = document.createElement('img')
+        img.src = url
+        img.onload = ()=>callback(img)
     }
 
-    function OnLoadedImage(image:ImageBitmap)
+    function handleImageLoaded(img: HTMLImageElement)
     {
-        loadedImage.current = image;
+        setImageLoaded(true)
+        console.log("image loaded")
+        setLoadedImage(img)
     }
+
+
 
     const handleScroll = () => {
         const currentScrollPos = window.scrollY;
@@ -78,7 +80,6 @@ export const ImageEdit: React.FC = () => {
     function showTutorialStep(step:number):boolean {
         
         const show = tutorialStep==step && showTutorial
-        console.log(`should we start step ${step}? ${show?"yes":"no"} tutorialStep=${tutorialStep}, showTutorial=${showTutorial} `)
         return show
     }
 
@@ -87,11 +88,11 @@ export const ImageEdit: React.FC = () => {
         if(!points) return;
         const point = points[0]
         focalPoint.current = point
-        if(loadedImage.current) InitializeAlignmentSettings(point,loadedImage.current);
+        if(loadedImage) InitializeAlignmentSettings(point,loadedImage);
         MoveTutorialStep(3)
     }
 
-    function InitializeAlignmentSettings(point:Point, image:ImageBitmap)
+    function InitializeAlignmentSettings(point:Point, image:HTMLImageElement)
     {
         const size:Size = {width:image.width, height:image.height}
         point = PixelToPercent(point,size)
@@ -121,11 +122,10 @@ export const ImageEdit: React.FC = () => {
     //updates the crop info from the user selected alignment settings
     function RecalculateCrop(alignment:AlignmentSettings)
     {
-        if(!loadedImage.current) return;
         if(!focalPoint.current) return;
 
         const pointPixel = focalPoint.current
-        const img = loadedImage.current;
+        const img = loadedImage;
         const imgSizePixels:Size = {width:img.width,height:img.height}         
 
         let [xDim,yDim] = ConvertToDims(pointPixel,imgSizePixels)
@@ -146,7 +146,7 @@ export const ImageEdit: React.FC = () => {
 
     function CanSave():boolean
     {
-        return loadedImage.current!=null && crop !=null
+        return isImageLoaded && crop !=null && focalPoint.current !=null
     }
 
     
@@ -175,8 +175,8 @@ export const ImageEdit: React.FC = () => {
             <div id='ImageColumn'>
                 <div className="StackPanel ">
                     <input ref={chooseImageButton} className='ImageUploadButton' type="file" accept="image/*" onChange={changeImage} />
-                    <span ref={iamgeContainer} id="uploadedImage" className="FillHorizontal" style={{ visibility: imagePath ? "visible" : "hidden" }} >
-                        <PointSelect crop={crop} src={imagePath} displayX={alignmentSettings.alignX} displayY={alignmentSettings.alignY} pointsChanged={handlePointsChanged}/>
+                    <span ref={iamgeContainer} id="uploadedImage" className="FillHorizontal" style={{ visibility: isImageLoaded ? "visible" : "hidden" }} >
+                        <PointSelect crop={crop} src={loadedImage} displayX={alignmentSettings.alignX} displayY={alignmentSettings.alignY} pointsChanged={handlePointsChanged}/>
                     </span>
                     
                     

@@ -10,6 +10,8 @@
     --LOD-background: 	hsl(184, 22%, 70%);
     --LOD-Text: #FFF;
 
+    --Canvas-background: hsl(184, 9%, 90%);
+
     --ButtonHue:184;
     --ButtonSaturation:55%;
     --SaveButtonHue:118;
@@ -53,20 +55,18 @@ body {
     width: 100%;
 }
 
-.PrimaryImage
+.PrimaryCanvas
 {
-    width: 100%;
-    max-height: 1080px;
-    display: inline-block;
-    overflow: auto;
+    background-color: var(--Canvas-background);
+    margin: 0px;
+    display: block;
 }
-.PrimaryImage2
+.CanvasHolder
 {
-    min-width: 60%;
-    max-width: 100%;
-    max-height: 1080px;
-    display: inline-block;
-    opacity: 0.5;
+    background-color: var(--Canvas-background);
+    width: 100%;
+    max-height: 80vh;
+    overflow: scroll;
 }
 .stack {
     display: grid;

@@ -109,3 +109,7 @@ export function CropToInset(crop:Crop,htmlImageSize:Size):Inset
     const right = htmlImageSize.width - (crop.size.width + crop.point.x)
     return {top:top,bottom:bottom,left:left,right:right}
 }
+
+export function clamp(value: number, min: number, max: number): number {
+    return Math.max(min, Math.min(max, value));
+}
