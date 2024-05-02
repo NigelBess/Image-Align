@@ -1,5 +1,5 @@
 import React, { useEffect, MouseEventHandler, FC, useState, useRef} from 'react';
-import {Point,Size, Crop, Inset} from '../DataObjects'
+import {Point,Size, Rectangle, Inset} from '../DataObjects'
 import * as Helpers from '../Helpers'
 
 
@@ -8,7 +8,7 @@ interface IPointSelectProperties {
     src:HTMLImageElement
     displayX:boolean
     displayY:boolean
-    crop:Crop|null//expects the crop as image pixel coordinates
+    crop:Rectangle|null//expects the crop as image pixel coordinates
     pointChanged:(points: Point|null)=>void//returns the points in image pixel coordinates
 }
 
@@ -33,8 +33,8 @@ export const PointSelect: FC<IPointSelectProperties> = ({src,displayX,displayY,c
   
     const canvas = useRef<HTMLCanvasElement>(null)
     const zoom = useRef<number>(1)
-    const lockedPoint = useRef<Point | null>(null)//stored in image pixel coordinates
-    const hoverPoint = useRef<Point | null> (null)//stored in image pixel coordinates
+    const lockedPoint = useRef<Point | null>(null)//stored in image pixel coordinates TL
+    const hoverPoint = useRef<Point | null> (null)//stored in image pixel coordinates TL
     
     function canvasContext():CanvasRenderingContext2D
     {
@@ -79,14 +79,32 @@ export const PointSelect: FC<IPointSelectProperties> = ({src,displayX,displayY,c
         const context = canvasContext()
         context.drawImage(src,0,0,width,height)
         const sizes = ExtractImageSizes(src,c)
+        const canvasSize = sizes.canvasSize
 
+        function RenderRectangle(rectangle:Rectangle,color:string)
+        {
+            const p = rectangle.point
+            const s = rectangle.size
+            context.fillStyle = color
+            context.fillRect(p.x,p.y,s.width,s.height)
+        }
         function RenderSelectionPoint(point:Point|null,color:string)
         {
             if(!point) return
-            const canvasPoint = Helpers.ConvertPointToNewSize(point,sizes.imgSize,sizes.canvasSize)
-            context.fillStyle = color
-            if(displayX) context.fillRect(canvasPoint.x,0,1,height)            
-            if(displayY) context.fillRect(0,canvasPoint.y,width,1)
+            const canvasPoint = Helpers.ConvertPointToNewSize(point,sizes.imgSize,canvasSize)
+            const rectangles:Rectangle[] = []
+            if(displayX) 
+            {
+                rectangles.push(Helpers.GenerateRectangle(0,canvasPoint.y,canvasSize.width,1))
+            }            
+            if(displayY)
+            {  
+                rectangles.push(Helpers.GenerateRectangle(canvasPoint.x,0,1,canvasSize.height))
+            }
+            rectangles.forEach(rect => {
+                RenderRectangle(rect,color)
+                
+            });
         }
 
         //draw lines for point selection
@@ -96,18 +114,23 @@ export const PointSelect: FC<IPointSelectProperties> = ({src,displayX,displayY,c
         const hoverPointColor =lockedPoint.current==null?mainLineColor:secondLineColor
         RenderSelectionPoint(hoverPoint.current,hoverPointColor)
         
-
+        
 
         //draw crop overlay
-        function RenderCrop(crop:Crop)
+        function RenderCrop(crop:Rectangle|null,color:string)
         {
             if(!crop) return
+
+            
             const inset = ConvertCrop(crop,sizes)
             //draw 4 rectangles to overlay crop
-
-            //top rectangle
-
+            const rectangles = Helpers.InsetToArray(inset)
+            rectangles.forEach(rect => {
+                RenderRectangle(rect,color)
+            });
         }
+        const cropOverlayColor = "#0005"
+        RenderCrop(crop,cropOverlayColor)
 
     }
 
@@ -156,7 +179,13 @@ export const PointSelect: FC<IPointSelectProperties> = ({src,displayX,displayY,c
 
   function broadcastPoint()
   {
-    pointChanged(lockedPoint.current)
+    if(canvas.current == null) return
+    let point = lockedPoint.current
+    if (point!=null)
+    {
+        point = Helpers.TLtoBLPoint(point,canvas.current.height)
+    }
+    pointChanged(point)
   }
 
   function ExtractImageSizes(image:HTMLImageElement, canvas:HTMLCanvasElement):ImageSizes
@@ -164,10 +193,12 @@ export const PointSelect: FC<IPointSelectProperties> = ({src,displayX,displayY,c
     return {canvasSize:{width:canvas.width,height:canvas.height},imgSize:{width:image.naturalWidth,height:image.naturalHeight}}
   }
 
-  function ConvertCrop(incoming:Crop,sizes:ImageSizes):Inset
+  function ConvertCrop(incoming:Rectangle,sizes:ImageSizes):Inset
   {
-    let newCrop = Helpers.ConvertCropToNewSize(incoming, sizes.imgSize,sizes.canvasSize)
-    const inset = Helpers.CropToInset(newCrop,sizes.canvasSize)
+    const canvasSize = sizes.canvasSize
+    let newCrop = Helpers.ConvertCropToNewSize(incoming, sizes.imgSize,canvasSize)
+    newCrop = Helpers.BLtoTLRectangle(newCrop,canvasSize.height)
+    const inset = Helpers.CropToInset(newCrop,canvasSize)
     return inset
   }
 

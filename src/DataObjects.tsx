@@ -13,16 +13,17 @@ export interface Size{
 export function DefaultSize():Size {return {width:0,height:0}}
 
 
-export interface Crop{
+export interface Rectangle{
     size:Size;
     point:Point;
 }
 
 export interface Inset{
-    top:number;
-    bottom:number;
-    left:number;
-    right:number;
+    top:Rectangle;
+    bottom:Rectangle;
+    left:Rectangle;
+    right:Rectangle;
 }
 
-export function DefaultCrop():Crop {return {point:DefaultPoint(),size:DefaultSize()}}
+
+export function DefaultCrop():Rectangle {return {point:DefaultPoint(),size:DefaultSize()}}

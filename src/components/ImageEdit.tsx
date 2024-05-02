@@ -6,7 +6,7 @@ import step3Arrow from '../img/step3Arrow.png';
 import { PointSelect} from './PointSelect';
 import { Toolbox, AlignmentSettings } from './Toolbox';
 import {Round, PixelToPercent,PercentToRatio} from '../Helpers'
-import  {Point,Size,Crop,DefaultCrop,DefaultSize} from '../DataObjects'
+import  {Point,Size,Rectangle,DefaultCrop,DefaultSize} from '../DataObjects'
 import {ConvertToDims,CalculateNewDim} from '../Dimension'
 
 
@@ -16,7 +16,7 @@ export const ImageEdit: React.FC = () => {
     const [isToolboxSticky, setToolboxSticky] = useState<boolean>(false);
     const [writeOnlyAlignmentSettings,setWOAlignmentSettings] = useState<AlignmentSettings>({alignX:true,alignY:true,xPercent:0,yPercent:0,useSize:false,size:DefaultSize()});
     const [readonlyAlignmentSettings,setROAlignmentSettings] = useState<AlignmentSettings>({alignX:true,alignY:true,xPercent:0,yPercent:0,useSize:false,size:DefaultSize()});
-    const [crop,setCrop] = useState<Crop>(DefaultCrop())
+    const [crop,setCrop] = useState<Rectangle>(DefaultCrop())
     const [loadedImage,setLoadedImage] = useState<HTMLImageElement>(document.createElement('img'))
     const [isImageLoaded,setImageLoaded] = useState<boolean>(false)
 
@@ -134,7 +134,7 @@ export const ImageEdit: React.FC = () => {
         
         const offsetX = pointPixel.x - xDim.x
         const offsetY = pointPixel.y - yDim.x
-        const newCrop:Crop = {point:{x:offsetX,y:offsetY},size:{width:xDim.length,height:yDim.length}}
+        const newCrop:Rectangle = {point:{x:offsetX,y:offsetY},size:{width:xDim.length,height:yDim.length}}
         setCrop(newCrop)
 
     }

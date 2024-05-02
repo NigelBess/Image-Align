@@ -1,4 +1,4 @@
-import { Point, Size, Crop, Inset} from "./DataObjects";
+import { Point, Size, Rectangle, Inset} from "./DataObjects";
 const PERCENT_MULT = 100
 
 export function Round(x:number,decimals:number=2):number{
@@ -81,14 +81,14 @@ export function ConvertSizeWithResize(toRescale:Size,oldSizeReference:Size,newSi
     return {width:pTemp.x,height:pTemp.y}
 }
 
-export function ConvertCropToNewSize(crop:Crop,oldSizeReference:Size, newSizeReference:Size):Crop
+export function ConvertCropToNewSize(crop:Rectangle,oldSizeReference:Size, newSizeReference:Size):Rectangle
 {
     const point = ConvertPointToNewSize(crop.point,oldSizeReference,newSizeReference)
     const size = ConvertSizeWithResize(crop.size,oldSizeReference,newSizeReference)
     return {point:point,size:size}
 }
 
-export function ConvertCropToTopLeft(crop:Crop,htmlImageSize:Size):Crop//re-defines crop to use top-left origin from default bottom-left origin
+export function ConvertCropToTopLeft(crop:Rectangle,htmlImageSize:Size):Rectangle//re-defines crop to use top-left origin from default bottom-left origin
 {
     let entryPoint = FlipVerticalAxis(crop.point,htmlImageSize)//references location of the Crop to the bottom left of the parent image
     entryPoint.y -= crop.size.height //point now references bottom left of crop
@@ -96,20 +96,43 @@ export function ConvertCropToTopLeft(crop:Crop,htmlImageSize:Size):Crop//re-defi
 
 }
 
-export function GenerateFullImageCrop(image:Size):Crop
+export function GenerateFullImageCrop(image:Size):Rectangle
 {
     return {point:{x:0,y:0},size:{...image}}
 }
 
-export function CropToInset(crop:Crop,htmlImageSize:Size):Inset
+export function CropToInset(crop:Rectangle,size:Size):Inset//assumes crop in TL coordinates
 {
-    const top = htmlImageSize.height-(crop.size.height + crop.point.y)
-    const bottom = crop.point.y
-    const left = crop.point.x
-    const right = htmlImageSize.width - (crop.size.width + crop.point.x)
+    const s = crop.size
+    const p = crop.point
+    const top = GenerateRectangle(0,0,size.width,p.y)
+    const bottom = GenerateRectangle(0,p.y+s.height,size.width,size.height-p.y-s.height)
+    const left = GenerateRectangle(0,p.y,p.x,s.height)
+    const right = GenerateRectangle(p.x+s.width,p.y,size.width-p.x-s.width,s.height)
     return {top:top,bottom:bottom,left:left,right:right}
+}
+
+export function BLtoTLRectangle(bl:Rectangle,containerHeight:number):Rectangle
+{
+    const p = bl.point
+    return {...bl,point:{x:p.x,y:containerHeight-p.y-bl.size.height}}
+}
+
+export function TLtoBLPoint(bl:Point,containerHeight:number):Point
+{
+    return {...bl,y:containerHeight-bl.y}
 }
 
 export function clamp(value: number, min: number, max: number): number {
     return Math.max(min, Math.min(max, value));
+}
+
+export function GenerateRectangle(x:number,y:number,width:number,height:number):Rectangle
+{
+    return {point:{x:x,y:y},size:{width:width,height:height}}
+}
+
+export function InsetToArray(inset:Inset):Rectangle[]
+{
+    return [inset.top,inset.bottom,inset.left,inset.right]
 }
