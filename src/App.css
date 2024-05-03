@@ -48,6 +48,7 @@ body {
     height: auto;
     display: flex;
     min-height: 600px;
+    border-radius: 10px;
 }
 .TopBar
 {
