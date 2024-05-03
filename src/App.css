@@ -123,6 +123,19 @@ body {
     align-self: center;  
 }
 
+.CenterStackPanel
+{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap:10px;
+}
+.CenterStackPanel > * {
+    /* This rule ensures that no specific item affects the general alignment */
+    margin: 0;                       /* Removes margin that might affect alignment */
+    align-self: center;              /* Forces each child to center align individually */
+  }
+
 
 
 .CheckBox
@@ -412,4 +425,16 @@ body {
 
 .right {
     text-align: right;
+}
+
+.Contact{
+    color: var(--DOL-Text);
+    margin: 100px;
+    text-align: center;
+}
+.ContactEmail{
+    margin: 100px 0px;
+    text-decoration: none;
+    color: inherit;
+    font-size: 60px;
 }
