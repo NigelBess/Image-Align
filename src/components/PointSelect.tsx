@@ -130,7 +130,7 @@ export const PointSelect: FC<IPointSelectProperties> = ({src,displayX,displayY,c
                 RenderRectangle(rect,color)
             });
         }
-        const cropOverlayColor = "#0005"
+        const cropOverlayColor = "#0008"
         RenderCrop(crop,cropOverlayColor)
 
     }

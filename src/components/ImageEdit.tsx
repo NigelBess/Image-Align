@@ -58,7 +58,6 @@ export const ImageEdit: React.FC = () => {
     function handleImageLoaded(img: HTMLImageElement)
     {
         setImageLoaded(true)
-        console.log("image loaded")
         setLoadedImage(img)
     }
 
@@ -89,7 +88,7 @@ export const ImageEdit: React.FC = () => {
     {
         if(!point) return;
         focalPoint.current = point
-        if(loadedImage) InitializeAlignmentSettings(point,loadedImage);
+        if(loadedImage!=null) InitializeAlignmentSettings(point,loadedImage);
         MoveTutorialStep(3)
     }
 
@@ -99,7 +98,7 @@ export const ImageEdit: React.FC = () => {
         point = PixelToPercent(point,size)
         const x = Round(point.x)
         const y =  Round(point.y)
-        setWOAlignmentSettings(old=>({...old,xPercent:x,yPercent:y}))
+        setWOAlignmentSettings(()=>({...readonlyAlignmentSettings,xPercent:x,yPercent:y}))
     }
 
     function showToolBar():boolean
@@ -136,7 +135,6 @@ export const ImageEdit: React.FC = () => {
         const offsetX = pointPixel.x - xDim.x
         const offsetY = pointPixel.y - yDim.x
         const newCrop:Rectangle = {point:{x:offsetX,y:offsetY},size:{width:xDim.length,height:yDim.length}}
-        console.log(newCrop.point.y)
         setCrop(newCrop)
 
     }
