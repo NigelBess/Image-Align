@@ -50,7 +50,7 @@ export const Overlay: React.FC<IOverlayProperties> = ({ targetRef, children,dire
   {
       if (!targetRef.current || !self.current) return;
       const [top,left] = GetPosition(direction,targetRef.current.getBoundingClientRect())
-      if (position.top == top && position.left==left) return
+      if (position.top === top && position.left===left) return
       setPosition({
           top: top,  
           left: left

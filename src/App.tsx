@@ -19,7 +19,7 @@ export const App:React.FC = () => {
           <div className='left' style={{margin:"0 10px"}}>
             <Link to='/' className='TopbarText'>
               <div className='HorizontalStackPanel'>
-                <img src={logo} className='LargeIcon'/>
+                <img src={logo} className='LargeIcon' alt="Image Align Logo Large"/>
                 <span className='TopbarText'> ImageAlign.io</span>
               </div>
               
@@ -27,9 +27,9 @@ export const App:React.FC = () => {
             
           </div>
           <div className='HorizontalStackPanel right' style={{margin:"0 20px"}}>
-            <a className='TransparentButton TopbarText' href='https://github.com/NigelBess/Image-Align' target='_blank'>
+            <a className='TransparentButton TopbarText' href='https://github.com/NigelBess/Image-Align' target='_blank' rel="noreferrer">
                 <div className='HorizontalStackPanel'>
-                <img className='Icon' src={ghImage}/>
+                <img className='Icon' src={ghImage} alt="Github Icon"/>
               <span>Github</span> 
               </div>
               

@@ -13,7 +13,6 @@ import {ConvertToDims,CalculateNewDim} from '../Dimension'
 
 export const ImageEdit: React.FC = () => {
     const [tutorialStep, setTutorialStep] = useState<number>(1);
-    const [showTutorial, setShowTutorial] = useState<boolean>(true);
     const [isToolboxSticky, setToolboxSticky] = useState<boolean>(false);
     const [writeOnlyAlignmentSettings,setWOAlignmentSettings] = useState<AlignmentSettings>({alignX:true,alignY:true,xPercent:0,yPercent:0,useSize:false,size:DefaultSize()});
     const [readonlyAlignmentSettings,setROAlignmentSettings] = useState<AlignmentSettings>({alignX:true,alignY:true,xPercent:0,yPercent:0,useSize:false,size:DefaultSize()});
@@ -80,7 +79,7 @@ export const ImageEdit: React.FC = () => {
 
     function showTutorialStep(step:number):boolean {
         
-        const show = tutorialStep==step && showTutorial
+        const show = tutorialStep===step
         return show
     }
 
@@ -103,7 +102,7 @@ export const ImageEdit: React.FC = () => {
 
     function showToolBar():boolean
     {
-        return !showTutorial || tutorialStep>2
+        return tutorialStep>2
     }
 
 
@@ -116,7 +115,7 @@ export const ImageEdit: React.FC = () => {
 
     function handleClickedToolColumn()
     {
-        if(tutorialStep==3) MoveTutorialStep(4)
+        if(tutorialStep===3) MoveTutorialStep(4)
     }
 
     //updates the crop info from the user selected alignment settings
@@ -222,19 +221,19 @@ export const ImageEdit: React.FC = () => {
         <div className='OuterContainer Shadow'>
         <Overlay targetRef={chooseImageButton} direction={OverlayDirection.Below}> 
             <div className='HorizontalStackPanel PulseGradient' style={{ visibility: showTutorialStep(1)? "visible" : "hidden" }} >
-                <img className='ArrowImage' src={step1Arrow} style={{height:"150px"}}/>
+                <img className='ArrowImage' alt="step 1 arrow"  src={step1Arrow} style={{height:"150px"}}/>
                 <span className='StepText'  >Choose an image you want to align</span>
             </div>           
         </Overlay>
         <Overlay targetRef={imageContainer} direction={OverlayDirection.Right}> 
             <div className='StackPanel PulseGradient' style={{ visibility: showTutorialStep(2) ? "visible" : "hidden" }} >
                 <span className='StepText' >Select the point you want to align</span>
-                <img className='ArrowImage' src={step2Arrow} style={{height:"70px", width:"auto", float:"left"}} />
+                <img className='ArrowImage' alt="step 2 arrow" src={step2Arrow} style={{height:"70px", width:"auto", float:"left"}} />
             </div>           
         </Overlay>
         <Overlay targetRef={toolBox} direction={OverlayDirection.Below}> 
                         <div className='HorizontalStackPanel PulseGradient' style={{ visibility: showTutorialStep(3)? "visible" : "hidden" }} >
-                            <img className='ArrowImage' src={step3Arrow} style={{height:"150px"}}/>
+                            <img className='ArrowImage' alt="step 3 arrow" src={step3Arrow} style={{height:"150px"}}/>
                             <span className='StepText'>Adjust the alignment settings here</span>
                         </div>        
         </Overlay>

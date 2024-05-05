@@ -1,4 +1,4 @@
-import React, { useEffect, MouseEventHandler, FC, useState, useRef} from 'react';
+import React, { useEffect, MouseEventHandler, FC, useRef} from 'react';
 import {Point,Size, Rectangle, Inset} from '../DataObjects'
 import * as Helpers from '../Helpers'
 
@@ -32,7 +32,6 @@ function GetRelativePositionPx(event:React.MouseEvent<HTMLElement>,sizes:ImageSi
 export const PointSelect: FC<IPointSelectProperties> = ({src,displayX,displayY,crop,pointChanged}) => {  
   
     const canvas = useRef<HTMLCanvasElement>(null)
-    const canvasHolder = useRef<HTMLDivElement>(null);
     const zoom = useRef<number>(1)
     const lockedPoint = useRef<Point | null>(null)//stored in image pixel coordinates TL
     const hoverPoint = useRef<Point | null> (null)//stored in image pixel coordinates TL

@@ -438,3 +438,13 @@ body {
     color: inherit;
     font-size: 60px;
 }
+.TitleLogo
+{
+    height: 100px;
+}
+
+.AdContainer
+{
+    min-height: 200px;
+    width: 100%;
+}
