@@ -45,6 +45,8 @@ export const App:React.FC = () => {
         </Routes>
       
       </div>
+      <div style={{display:"none"}}>Website Version 1.0.0.1</div>
+      <div style={{display:"none"}}>This section contains keywords for SEO. Center an image. Center an image vertically. Center an image horizontally. Picture. Photo. Upload a photo and center it. Align object in a picture to a specified height. Align to specified width. Algin subject to rule of thirds. rule-of-thirds</div>
       </Router>
 
   );
