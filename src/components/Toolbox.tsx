@@ -76,6 +76,7 @@ export const Toolbox: React.FC<IToolboxProperties> = ({alignmentSettings,alignme
 
 
     return (       
+            
 
                 <div className='StackPanel' style={{margin:"20px"}}>
                     <div className='CenterStackItem'>New Position</div>

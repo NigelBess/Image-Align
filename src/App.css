@@ -326,13 +326,12 @@ body {
 
 #ImageColumn
 {
-    width: 70%;
+    flex-grow: 1;
 }
 .ToolColumn
 {
-    min-width: 10%;
-    max-width: 30%;
-    background-color: #000;
+    flex-grow: 0;
+    align-self: right;
 }
 .Shadow 
 {
@@ -347,6 +346,10 @@ body {
 .ImageUploadButton
 {
     cursor: pointer;
+}
+#uploadedImage
+{
+    max-width: 100%;
 }
 
 .PulseGradient 

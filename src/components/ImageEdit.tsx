@@ -241,7 +241,7 @@ export const ImageEdit: React.FC = () => {
             <div id='ImageColumn'>
                 <div className="StackPanel ">
                     <input ref={chooseImageButton} className='ImageUploadButton' type="file" accept="image/*" onChange={changeImage} />
-                    <span ref={imageContainer} id="uploadedImage" className="FillHorizontal" style={{ visibility: isImageLoaded ? "visible" : "hidden" }} >
+                    <span ref={imageContainer} id="uploadedImage" style={{ visibility: isImageLoaded ? "visible" : "hidden" }} >
                         <PointSelect crop={crop} src={loadedImage} displayX={readonlyAlignmentSettings.alignX} displayY={readonlyAlignmentSettings.alignY} pointChanged={handlePointChanged}/>
                     </span>
                     
